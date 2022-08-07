@@ -1,6 +1,6 @@
 const express = require('express');
 const abc = require('../introduction/intro')
-const welCome = require('../logger/logger')
+const welCome = require('../logger/logger.js')
 const info = require('../util/helper')
 const format = require('../validator/formatter')
 const router = express.Router();
@@ -22,6 +22,13 @@ router.get('/test-me', function (req, res) {
     res.send('My second ever api!')
 });
 
+// router.get('/hello', function(req, res){
+//   let x = ["Januaray","Febuary","March","April","May","June","July","August","September","October","November","Decembet"]
+//   console.log(x[8])
+
+//     res.send(' Hello , My second ever api!')
+
+// });
 
 router.get('/test-you', function(req, res){
     res.send('This is the second routes implementation')
