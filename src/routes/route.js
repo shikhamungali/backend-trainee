@@ -7,22 +7,22 @@ const info = require('../util/helper')
 const format = require('../validator/formatter')
 const router = express.Router();
 
-// router.get('/test-me', function (req, res) {
-//     console.log('My batch is', abc.name)
-//     abc.printName()
+router.get('/test-me', function (req, res) {
+    console.log('My batch is', abc.name)
+    abc.printName()
 
-//     welCome.hello()
+    welCome.hello()
 
-//     info.currentDate()
-//     info.currentMonth()
-//     info.batch()
+    info.currentDate()
+    info.currentMonth()
+    info.batch()
 
-//     format.trim()
-//     format.changetoLowerCase()
-//     format.changeToUpperCase()
+    format.trim()
+    format.changetoLowerCase()
+    format.changeToUpperCase()
 
-//     res.send('My second ever api!')
-// });
+    res.send('My second ever api!')
+});
 
 router.get('/hello', function(req, res){
   let x = ["Januaray","Febuary","March","April","May","June","July","August","September","October","November","Decembet"]
@@ -45,57 +45,6 @@ router.get('/hello', function(req, res){
 
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-router.get('/films/', function(req, res){
-    let movies = ['Rang de Basanti','The Shining','Conjuring','Harry potter']
-    
-    res.send(movies)
-})
-
-// router.get('/films/:indexNumber', function (req, res) {
-    //     let movies = ['Rang de Basanti', 'The Shining', 'Conjuring', 'Harry potter']
-    //     // for(i=0;i<=(movies.length-1);i++){
-//         // console.log(req.params['indexNumber'])
-//     // }
-//     res.send(movies[req.params['indexNumber']])
-//     // console.log(JSON.stringify(req.params))
-// })
-router.get('/films/:indexNumber', function (req, res) {
-    let movies = ['Rang de Basanti', 'The Shining', 'Conjuring', 'Harry potter']
-   
- if (req.params['indexNumber'] <=3){
-     res.send(movies[req.params['indexNumber']])
-    }
-    else{
-        res.send("indexNumber not found.")
-    }
-})
-
-router.get('/movies/:keyId', function(req, res){
-    let films = [{id:1,name:'Rang de Basanti'}, {id:2,name:'The Shining'}, {id:3,name:'Conjuring'}, {id:4,name:'Harry potter'}]
-    // if (req.params['keyId'] === 0) {
-    //     res.send("movie not found.")
-    // }
-    if (req.params['keyId']<=4) {
-        res.send(films[req.params['keyId']-1])
-    }
-    else{
-        res.send("movie  not found.")
-    }
-
-    // res.send(films)
-})
 
 
 
