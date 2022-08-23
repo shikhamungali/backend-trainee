@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const route = require('./routes/route.js');
 const { default: mongoose } = require('mongoose');
 const app = express();
+const moment = require('moment')
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -13,6 +14,18 @@ mongoose.connect("mongodb+srv://Shikhamungali:4t2GRX51VoOU37yQ@cluster0.8hmxve1.
 })
 .then( () => console.log("MongoDb is connected"))
 .catch ( err => console.log(err) )
+
+app.use(
+    function (req, res, next) {
+        const date = moment().format('DD-MM-YYYY, HH:mm:ss');
+        const ipAddress = req.ip;
+        const r = req.originalUrl
+        console.log(date, " , ", ipAddress, " , ", r);
+        next();
+    }
+);
+
+
 
 app.use('/', route);
 

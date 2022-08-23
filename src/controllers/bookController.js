@@ -23,13 +23,15 @@ const createBook = async function (req, res) {
         let bookCreated = await bookModel.create(book)
         res.send({ data: bookCreated })
     }
-
 }
+
+
 
 const getBooksData = async function (req, res) {
     let books = await bookModel.find()
     res.send({ data: books })
 }
+
 
 const getBooksWithAuthorDetails = async function (req, res) {
     let specificBook = await bookModel.find().populate('author publisher') //mutiple key references
@@ -47,10 +49,21 @@ const updateBooks = async function (req, res) {
     let updateRating = await bookModel.updateMany({ author: r2 }, { $inc: { price: 10 } }, { new: true })
 
     res.send({ data: updateRating, updatecover })
-
 }
+
+
+
+const getSumOfPrices = async function(req,res){
+    let sum = await bookModel.aggregate([
+        { $group: { _id:'$name', sumOfPrices:{$sum:"$price"}}},
+        {$sort:{sumOfPrices:-1} }
+    ])
+    res.send({msg:sum})
+}
+
 
 module.exports.createBook = createBook
 module.exports.getBooksData = getBooksData
 module.exports.getBooksWithAuthorDetails = getBooksWithAuthorDetails
 module.exports.updateBooks = updateBooks
+module.exports.getSumOfPrices = getSumOfPrices
