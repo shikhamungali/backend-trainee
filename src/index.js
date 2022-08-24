@@ -19,8 +19,8 @@ app.use(
     function (req, res, next) {
         const date = moment().format('DD-MM-YYYY, HH:mm:ss');
         const ipAddress = req.ip;
-        const r = req.originalUrl
-        console.log(date, " , ", ipAddress, " , ", r);
+        const URL = req.originalUrl;
+        console.log(date, " , ", ipAddress, " , ", URL);
         next();
     }
 );
