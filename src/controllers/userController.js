@@ -33,15 +33,17 @@ const loginUser = async function (req, res) {
   // The same secret will be used to decode tokens 
   let token = jwt.sign(
     {
-      userId: user._id.toString(),
-      batch: "thorium",
+      userId: user._id.toString(), //////////////// PAYLOAD
+      batch: "PLUTONIUM",
       organisation: "FunctionUp",
     },
-    "functionup-plutonium-very-very-secret-key"
+    "functionup-plutonium-very-very-secret-key" //// SECRET KEY
   );
   res.setHeader("x-auth-token", token);
   res.send({ status: true, token: token });
 };
+
+
 
 const getUserData = async function (req, res) {
   let token = req.headers["x-Auth-token"];
@@ -62,6 +64,7 @@ const getUserData = async function (req, res) {
   // A token can only be decoded successfully if the same secret was used to create(sign) that token.
   // And because this token is only known to the server, it can be assumed that if a token is decoded at server then this token must have been issued by the same server in past.
   let decodedToken = jwt.verify(token, "functionup-plutonium-very-very-secret-key");
+  console.log(decodedToken) ///////return payload with "iat" meaning issued at with the time stamp
   if (!decodedToken)
     return res.send({ status: false, msg: "token is invalid" });
 
