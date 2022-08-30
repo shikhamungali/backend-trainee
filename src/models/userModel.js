@@ -20,4 +20,4 @@ const userSchema = new mongoose.Schema( {
     age: Number
 }, { timestamps: true });
 
-module.exports = mongoose.model('UserData', userSchema)
+module.exports = mongoose.model('UserData', userSchema) //userdatas
