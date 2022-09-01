@@ -1,31 +1,33 @@
 const express = require('express');
 const router = express.Router();
-const userController= require("../controllers/userController")
-const auth = require('../middleware/auth')
+const weatherController = require("../controllers/weatherController")
+const memeController = require("../controllers/memeController")
+const CowinController = require("../controllers/cowinController")
+
 
 /////================================= TEST API ===================================================
 router.get("/test-me", function (req, res) {
     res.send("My first ever api!")
 })
 
-///// =============================== users API =========================================
+//=================================== cowin apis ==========================================================
 
-router.post("/users", userController.createUser  )
+router.get("/cowin/states", CowinController.getStates)
+router.get("/cowin/districtsInState/:stateId", CowinController.getDistricts)
+router.get("/cowin/getByPin", CowinController.getByPin)
+router.post("/cowin/getOtp", CowinController.getOtp)
 
-///=============================================== USER LOGIN API ====================================
+router.get("/cowin/getByDistrict", CowinController.getByDistrict) //// ASSIGNMENT QUESTION
 
-router.post("/login", userController.loginUser)
 
-//=============================================== USER DATA API ========================================
+//===================================== weather apis ============================================================
+router.get("/getweather", weatherController.getweather)
+router.get("/gettemp", weatherController.gettemp)
+router.get("/getcitytemp", weatherController.getcitytemp)
 
-router.get("/users/:userId",auth.authentication,auth.authorization,auth.params ,userController.getUserData)
 
-///====================================== USER UPDATING API =============================================
-
-router.put("/users/:userId",auth.authentication,auth.authorization,auth.params , userController.updateUser)
-
-///========================================= DELETING A USER API ======================================
-
-router.delete('/users/:userId',auth.authentication,auth.authorization,auth.params ,userController.deleteUser)
+//===================================== memes apis ===========================================================
+router.get("/getmemes", memeController.getmemes)
+router.post("/postmemes", memeController.postmeme)
 
 module.exports = router;

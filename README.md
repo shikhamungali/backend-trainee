@@ -1,35 +1,43 @@
-TOPIC: Authorisation
-Authentication with JWT
-Token generation
-Token verification
-Assignment
-For this assignment you have to create a new branch - assignment/auth-3
-Your user document should look like this
- 	{
-    "_id" : ObjectId("6226e3d2b98f22b349ca58be"),
-    "firstName" : "Sabiha",
-    "lastName" : "Khan",
-    "mobile" : "9898909087",
-    "emailId" : "sk@gmail.com",
-    "password" : "password123",
-    "gender" : "female",
-	"isDeleted": false, //default value is false 
-    "age" : 12,
-    "createdAt" : ISODate("2022-03-08T05:04:18.737Z"),
-    "updatedAt" : ISODate("2022-03-08T05:04:18.737Z"),
-    "__v" : 0
-}
-Write a POST api to register a user from the user details in request body.
-Write a POST api to login a user that takes user details like email and password from the request body. If the credentials don't match with any user's data return a suitable error. On successful login, generate a JWT token and return it both in response body.
-Write a GET api to fetch user details. Pass the userId as path param in the url. Check that request must contain x-auth-token header. If absent, return a suitable error. If present, check that the token is valid.
-Write a PUT api to update user details. Pass the userId as path param in the url and update the attributes received in the reauest body. Check that request must contain x-auth-token header. If absent, return a suitable error.
-Write a DELETE api that takes the userId in the path params and marks the isDeleted attribute for a user as true. Check that request must contain x-auth-token header. If absent, return a suitable error.
-Once, all the apis are working fine, move the authentication related code in a middleware called auth.js
-Add this middleware at route level in the routes where applicale.
-+ Please note that you have to also write the logic for authorisation now so that a logged in user can modify or fetch ONLY their own data.
-+ You have to implement authorisation for fetch user details, update user and delete user apis
-+ Run this code and ensure the authorisation works fine for all the apis before following the next requirement
-+ You now have to move this similar code in all the three apis in a suitable middleware
+Assignments :
 
+
+1.  WRITE A GET API TO GET THE LIST OF ALL THE "vaccination sessions by district id" for any given district id and for any given date. This is a very basic assignment and totally along the lines of what we covered in the session
+
+2.  GOTO  http://api.openweathermap.org => “subscribe” current weather data ==> get api key for Free version ==> create new account and Verify your emailId( Must verify to avoid issues) => go to My APi keys under your account name(top right corner) or https://home.openweathermap.org/api_keys => save the key/appid somewhere. Now proceed further.
+
+ # API KEY  === b2fb6920f70517bed1938b0ea5b62fc0,
+
+
+Create API's to do the following:
+Get weather of London from  http://api.openweathermap.org/data/2.5/weather?q=London&appid=<useYourOwnAppId>  
+(NOTE: must use HTTP infront of the url else axios will attempt to hit localhost and give error  ..also use HTTP only and not HTTPS)
+then change the above to get the temperature only( of London)
+Sort the cities     [ "Bengaluru","Mumbai", "Delhi", "Kolkata", "Chennai", "London", "Moscow"]   in order of their increasing temperature
+Result should look something like this
+ 
+                   [
+                   {city:"London", temp: 280},
+                   {city:"Moscow", temp: 290},
+                   {city:"Bangalore", temp: 301.2},
+                   .......
+                   ]
+
+3. Axios POST request assignment Statement:
+Step1: Get all the memes at Postman (https://api.imgflip.com/get_memes)
+Step 2 : Pick a memeId you want (Eg 129242436) for the POST request (from the result from  above )
+Assignment: Create a Post request API (https://api.imgflip.com/caption_image) with only query params. Following are the params (copy username and password exactly as given below OR incase you find error in using this username password due to too many people trying to access it, then create your own account and plz do share username password on your group so that others can use it too- be kind and helpful):
+    
+           template_id <meme_id>
+           text0 <text you want as a caption>
+           text1 <optional>
+           username chewie12345
+           password meme@123
+
+Return a response with a body like this
+            
+           "data": {
+                   "url": "https://i.imgflip.com/5mvxax.jpg",
+                   "page_url": "https://imgflip.com/i/5mvxax"
+               }
 
 
