@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const userController = require("../controllers/userController")
 
 
 
@@ -7,10 +8,7 @@ const router = express.Router();
 
 
 
-
-
-
-
+router.post("/POST/register",userController.createUser)
 
 
 //======================== to check if the endpoint is correct or not =========================================
