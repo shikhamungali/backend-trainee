@@ -7,12 +7,12 @@ const isValidEmail = function (mail) {
 };
 
 const isValidPassword = function (pass) {
-  if (/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,32}$/.test(pass)) return true;
+  if (/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,15}$/.test(pass)) return true;
   return false
 };
 
 const isValidName = function(name){
-  if (/^[A-Za-z]{1,35}/.test(name)) return true
+  if (/^[A-Za-z\s]{1,35}/.test(name)) return true 
   return false
 }
 
@@ -21,9 +21,15 @@ const isValidBody = function (data) {
 }
 
 
-const validPhone=function(mobile){
+const isvalidPhone=function(mobile){
     if(/^(\+91[\-\s]?)?[0]?(91)?[789]\d{9}$/.test(mobile)) return true
     return false
   }
 
-module.exports = { isValidEmail,isValidName, isValidBody, isValidPassword,validPhone};
+
+  const isvalidPincode = function(pincode){
+    if (/^[1-9]{1}[0-9]{2}\s{0,1}[0-9]{3}$/.test(pincode)) return true
+    return false
+  }
+
+module.exports = { isValidEmail,isValidName, isValidBody, isValidPassword,isvalidPhone,isvalidPincode};

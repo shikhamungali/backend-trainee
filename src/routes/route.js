@@ -1,6 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const userController = require("../controllers/userController")
+const {createUser,userLogin} = require("../controllers/userController")
+
+//========================= user apis ========================================================
+router.post("/register",createUser)
+router.post("/login",userLogin)
+
+
+//========================= book apis =========================================================
+
+
+
+
+//================================= review apis =================================================
 
 
 
@@ -8,7 +20,6 @@ const userController = require("../controllers/userController")
 
 
 
-router.post("/POST/register",userController.createUser)
 
 
 //======================== to check if the endpoint is correct or not =========================================
