@@ -1,5 +1,6 @@
 const userModel = require("../models/userModel")
 const { isValidBody, isValidEmail, isValidName, isValidPassword, isvalidPhone, isvalidPincode } = require("../validation/validator");
+const jwt = require('jsonwebtoken')
 
 
 
@@ -52,7 +53,7 @@ const createUser = async function (req, res) {
         if (!phone || !isvalidPhone(phone))
             return res.status(400).send({
                 status: false,
-                message: "Name is required in a string format length should be 2 to 10",
+                message: "phone no. is required in a string format length should be 2 to 10",
             });
         //============================= duplicate phone no. ========================================
         let inputPhone = await userModel.findOne({ phone: phone });
@@ -111,7 +112,9 @@ const userLogin = async function (req, res) {
             return res.status(401).send({ status: false, message: "Invalid email or Password" })
 
         // ========================= token creation ===============================================
-        let token = jwt.sign({ userId: findUser._id }, "humetanahibananahaii", { expiresIn: "24h" })
+        let token = jwt.sign({ userId: findUser._id }, "humetanahibananahaii", { expiresIn: 60 })
+        let decode = jwt.decode(token, "humetanahibananahaii")
+        console.log(decode)
 
         res.status(201).send({ status: true, message: "User logged in Successfully", data: token })
     }
