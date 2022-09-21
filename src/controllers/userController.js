@@ -53,7 +53,7 @@ const createUser = async function (req, res) {
         if (!phone || !isvalidPhone(phone))
             return res.status(400).send({
                 status: false,
-                message: "phone no. is required in a string format length should be 2 to 10",
+                message: "phone no. is required in a string format length should be of 10",
             });
         //============================= duplicate phone no. ========================================
         let inputPhone = await userModel.findOne({ phone: phone });

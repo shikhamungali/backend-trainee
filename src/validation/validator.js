@@ -1,9 +1,10 @@
-
+const moment = require('moment')
 
 const isValidEmail = function (mail) {
   if (/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(mail)) {
     return true;
   }
+  return false
 };
 
 
@@ -41,5 +42,10 @@ const isvalidPincode = function (pincode) {
 };
 
 
+const isValidDate = function (date) {
+  if (typeof date != "string") return false
+  return moment(date, 'YYYY-MM-DD', true).isValid()
+}
 
-module.exports = { isValidEmail, isValidName, isValidBody, isValidPassword, isvalidPhone, isvalidPincode };
+
+module.exports = { isValidEmail, isValidName, isValidBody, isValidPassword, isvalidPhone, isvalidPincode,isValidDate };
