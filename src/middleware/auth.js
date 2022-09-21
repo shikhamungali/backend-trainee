@@ -5,7 +5,9 @@ const booksModel = require("../models/booksModel")
 const authentication = function (req, res, next) {
     try {
         let token = req.headers["x-api-key"]
-        if (!token) return res.status(401).send({ status: false, message: "Please provide a token" })
+        if (!token) {
+            return res.status(401).send({ status: false, message: "Please provide a token" })
+        }
 
         jwt.verify(token, "humetanahibananahaii", function (err, decodedToken) {
             if (err && err.message == "jwt expired") {
@@ -25,19 +27,24 @@ const authentication = function (req, res, next) {
     }
 }
 
-const authorisation = async function (req, res,next) {
+
+
+const authorisation = async function (req, res, next) {
     try {
         let bookid = req.params.bookId
 
         if (!mongoose.Types.ObjectId.isValid(bookid)) {
-        return res.status(400).send({ status: false, message: "Invalid Book Id" })}
+            return res.status(400).send({ status: false, message: "Invalid Book Id" })
+        }
 
         let validUser = req.token // userid from token
 
         let book = await booksModel.findById(bookid)
         let user = book.userId.toString() //userId from book
 
-        if (!book) return res.status(404).send({ status: false, message: "Book not found or BookId doesnot exist" })
+        if (!book) {
+            return res.status(404).send({ status: false, message: "Book not found or BookId doesnot exist" })
+        }
 
         if (user !== validUser) {
             return res.status(403).send({ status: false, message: "Sorry! Unauthorized User" })
@@ -54,4 +61,4 @@ const authorisation = async function (req, res,next) {
 
 
 
-module.exports = { authentication ,authorisation}
+module.exports = { authentication, authorisation }

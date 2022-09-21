@@ -12,6 +12,7 @@ const stringRegex = /^[ a-z ]+$/i
 
 
 //====================================== creating books ===================================================
+
 const createBooks = async function (req, res) {
     try {
         let requestBody = req.body;
@@ -103,7 +104,12 @@ const createBooks = async function (req, res) {
 
 
 
+
+
+
+
 //=================================== geting books data using query params ==================================
+
 const getBooks = async function (req, res) {
     try {
         const queryParams = req.query
@@ -125,7 +131,7 @@ const getBooks = async function (req, res) {
         //=============================== finding books in DB ========================================
         const books = await booksModel.find({ $and: [{ ...queryParams }, { isDeleted: false }] }).sort({ title: 1 }).select('_id title excerpt userId category releasedAt reviews')
         books.sort((a, b) => a.title.localeCompare(b.title))
-
+        //============================ if book is not found ===========================================
         if (books.length === 0) {
             return res.status(404).send({ status: false, message: "Books not found" })
         }
@@ -142,12 +148,17 @@ const getBooks = async function (req, res) {
 
 
 
+
+
+//=================================== get books by path params ========================================
+
 const getBookById = async function (req, res) {
     try {
         const bookid = req.params.bookId
-
-        if (!mongoose.Types.ObjectId.isValid(bookid)) return res.status(400).send({ status: false, message: "Invalid Book Id" })
-
+        //========================== invalid format of bookid =========================================
+        if (!mongoose.Types.ObjectId.isValid(bookid)) {
+            return res.status(400).send({ status: false, message: "Invalid Book Id" })
+        }
         const book = await booksModel.findOne({ _id: bookid, isDeleted: false })
 
         if (!book) return res.status(404).send({ status: false, message: "Sorry! No book found Or Book may be deleted" })
@@ -169,14 +180,42 @@ const getBookById = async function (req, res) {
 
 
 
+
+
+
+//========================================== update books =====================================================
+
 const updateBooks = async function (req, res) {
     try {
         const bookId = req.params.bookId
         let { title, excerpt, releasedAt, ISBN } = req.body
-
+        //======================= if invalid book id ==========================================
         if (!mongoose.Types.ObjectId.isValid(bookId)) {
             return res.status(400).send({ status: false, message: "Invalid Book Id" })
         }
+        //=========================== if bodydata is empty =======================================
+        if(Object.keys(req.body).length === 0){
+            return res.status(400).send({ status: false, message: "Body cannot be empty" })
+        }
+        //============================== if title already exist =====================================
+        let checkTitle = await booksModel.findOne({ title: title })
+        if (checkTitle) {
+            return res.status(400).send({ status: false, message: "Title already used" })
+        }
+        //======================== invalid format of ISBN =======================================
+        if (!isValidISBN13(ISBN)) {
+            return res.status(400).send({ status: false, message: "Please provide correct format for ISBN" })
+        };
+        //================================ if ISBN already exist =====================================
+        let checkISBN = await booksModel.findOne({ ISBN: ISBN })
+        if (checkISBN) {
+            return res.status(400).send({ status: false, message: "ISBN already used" })
+        }
+        //============================== valid format of releasedAt ====================================
+        if (!isValidDate(releasedAt)) {
+            return res.status(400).send({ status: false, message: "releasedAt is in incorrect format (YYYY-MM-DD)" })
+        }
+        //========================== check of blogid exist =======================================
         const findBook = await booksModel.findOne({ _id: bookId })
         if (findBook) {
             const updateBooks = await booksModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { title: title, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN }, { new: true })
@@ -190,6 +229,8 @@ const updateBooks = async function (req, res) {
         res.status(500).send({ status: false, error: err.message })
     }
 }
+
+
 
 
 
