@@ -112,7 +112,7 @@ const userLogin = async function (req, res) {
             return res.status(401).send({ status: false, message: "Invalid email or Password" })
 
         // ========================= token creation ===============================================
-        let token = jwt.sign({ userId: findUser._id }, "humetanahibananahaii", { expiresIn: 60 })
+        let token = jwt.sign({ userId: findUser._id }, "humetanahibananahaii", { expiresIn: '1h' })
         let decode = jwt.decode(token, "humetanahibananahaii")
         console.log(decode)
 

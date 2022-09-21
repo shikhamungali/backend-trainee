@@ -1,14 +1,14 @@
 const reviewModel = require("../models/reviewModel")
 const booksModel = require("../models/booksModel")
-const { isValidDate } = require("../validation/validator");
+const userModel = require('../models/userModel')
+const { isValidDate,isValidISBN13 } = require("../validation/validator");
 const mongoose = require('mongoose')
 
 
 
 
 const stringRegex = /^[ a-z ]+$/i
-const isbn10 = /^(?=(?:\D*\d){7}(?:(?:\D*\d){3})?$)[\d-]+$/
-const isbn13 = /^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/
+
 
 
 //====================================== creating books ===================================================
@@ -23,6 +23,11 @@ const createBooks = async function (req, res) {
         if (!title) {
             return res.status(400).send({ status: false, message: "Title is required" })
         };
+        //============================== if title already exist =====================================
+        let checkTitle = await booksModel.findOne({ title: title })
+        if (checkTitle) {
+            return res.status(400).send({ status: false, message: "Title already used" })
+        }
         //============================ excerpt is mandatory =========================================
         if (!excerpt) {
             return res.status(400).send({ status: false, message: "excerpt is required" })
@@ -37,7 +42,7 @@ const createBooks = async function (req, res) {
             return res.status(400).send({ status: false, msg: "invalid userId format" });
         }
         //=============================== if userId is not found ======================================
-        let checkuserId = await booksModel.findOne({ userId: userId })
+        let checkuserId = await userModel.findOne({ userId: userId })
         if (!checkuserId) {
             return res.status(400).send({ status: false, message: "userId not found" })
         }
@@ -53,9 +58,14 @@ const createBooks = async function (req, res) {
             return res.status(400).send({ status: false, message: "ISBN is required" })
         };
         //======================== invalid format of ISBN =======================================
-        if (!ISBN.match(isbn10) && !ISBN.match(isbn13)) {
+        if (!isValidISBN13(ISBN)) {
             return res.status(400).send({ status: false, message: "Please provide correct format for ISBN" })
         };
+        //================================ if ISBN already exist =====================================
+        let checkISBN = await booksModel.findOne({ ISBN: ISBN })
+        if (checkISBN) {
+            return res.status(400).send({ status: false, message: "ISBN already used" })
+        }
         //=================================== category is mandatory ==============================
         if (!category) {
             return res.status(400).send({ status: false, message: "category is required" })
@@ -79,16 +89,8 @@ const createBooks = async function (req, res) {
         if (!isValidDate(releasedAt)) {
             return res.status(400).send({ status: false, message: "releasedAt is in incorrect format (YYYY-MM-DD)" })
         }
-        //============================== if title already exist =====================================
-        let checkTitle = await booksModel.findOne({ title: title })
-        if (checkTitle) {
-            return res.status(400).send({ status: false, message: "Title already used" })
-        }
-        //================================ if ISBN already exist =====================================
-        let checkISBN = await booksModel.findOne({ ISBN: ISBN })
-        if (checkISBN) {
-            return res.status(400).send({ status: false, message: "ISBN already used" })
-        }
+        
+        
         //============================== createing books ============================================
         const newBook = await booksModel.create(requestBody);
         return res.status(201).send({ status: true, message: "Book created successfully", data: newBook })
@@ -128,6 +130,10 @@ const getBooks = async function (req, res) {
 
     }
 }
+
+
+
+
 
 
 

@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 
-const authorization = function (req, res, next) {
+const authentication = function (req, res, next) {
     try {
         let token = req.headers["x-api-key"]
         if (!token) return res.status(401).send({ status: false, message: "Please provide a token" })
@@ -23,4 +23,8 @@ const authorization = function (req, res, next) {
     }
 }
 
-module.exports = { authorization }
+
+
+
+
+module.exports = { authentication }

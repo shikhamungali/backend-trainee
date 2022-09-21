@@ -48,4 +48,10 @@ const isValidDate = function (date) {
 }
 
 
-module.exports = { isValidEmail, isValidName, isValidBody, isValidPassword, isvalidPhone, isvalidPincode,isValidDate };
+const isValidISBN13 = function (ISBN) {
+  if (/^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/.test(ISBN)) return true;
+  return false
+}
+
+
+module.exports = { isValidEmail, isValidName, isValidBody, isValidPassword, isvalidPhone, isvalidPincode,isValidDate ,isValidISBN13 };
