@@ -1,7 +1,7 @@
 const reviewModel = require("../models/reviewModel")
 const booksModel = require("../models/booksModel")
 const userModel = require('../models/userModel')
-const { isValidDate,isValidISBN13 } = require("../validation/validator");
+const { isValidDate, isValidISBN13 } = require("../validation/validator");
 const mongoose = require('mongoose')
 
 
@@ -89,8 +89,8 @@ const createBooks = async function (req, res) {
         if (!isValidDate(releasedAt)) {
             return res.status(400).send({ status: false, message: "releasedAt is in incorrect format (YYYY-MM-DD)" })
         }
-        
-        
+
+
         //============================== createing books ============================================
         const newBook = await booksModel.create(requestBody);
         return res.status(201).send({ status: true, message: "Book created successfully", data: newBook })
@@ -107,19 +107,26 @@ const createBooks = async function (req, res) {
 const getBooks = async function (req, res) {
     try {
         const queryParams = req.query
+        let { userId, category, subcategory } = queryParams
+
         //========================== if query are not entered ==========================================
-        if (!queryParams) {
+        if (Object.keys(queryParams).length == 0) {
             return res.status(400).send({ status: false, message: "enter query to get data" })
         }
+        if (!(userId || category || subcategory)) {
+            return res.status(400).send({ status: false, message: "enter valid query to get data" })
+        }
         //================================== if userId is of invalid format =============================
-        if (!mongoose.Types.ObjectId.isValid(queryParams.userId)) {
-            return res.status(400).send({ status: false, msg: "invalid userId format" });
+        if (userId) {
+            if (!mongoose.isValidObjectId(userId)) {
+                return res.status(400).send({ status: false, msg: "invalid userId format" });
+            }
         }
         //=============================== finding books in DB ========================================
-        const books = await booksModel.find({ ...queryParams, isDeleted: false }).sort({ title: 1 }).select('_id title excerpt userId category releasedAt reviews')
+        const books = await booksModel.find({ $and: [{ ...queryParams }, { isDeleted: false }] }).sort({ title: 1 }).select('_id title excerpt userId category releasedAt reviews')
         books.sort((a, b) => a.title.localeCompare(b.title))
 
-        if (books && books.length == 0) {
+        if (books.length === 0) {
             return res.status(404).send({ status: false, message: "Books not found" })
         }
         return res.status(200).send({ status: true, message: "Books list", data: books })
@@ -135,6 +142,56 @@ const getBooks = async function (req, res) {
 
 
 
+const getBookById = async function (req, res) {
+    try {
+        const bookid = req.params.bookId
+
+        if (!mongoose.Types.ObjectId.isValid(bookid)) return res.status(400).send({ status: false, message: "Invalid Book Id" })
+
+        const book = await booksModel.findOne({ _id: bookid, isDeleted: false })
+
+        if (!book) return res.status(404).send({ status: false, message: "Sorry! No book found Or Book may be deleted" })
+
+        let review = await reviewModel.find({ bookId: bookid, isDeleted: false })
+        const bookData = book.toObject() // to convert into mongoose object
+        bookData["reviewsData"] = review
+
+        return res.status(200).send({ status: true, message: "Book List", data: bookData })
+    }
+
+    catch (err) {
+        res.status(500).send({ status: false, error: err.message })
+    }
+
+}
 
 
-module.exports = { createBooks, getBooks }
+
+
+
+const updateBooks = async function (req, res) {
+    try {
+        const bookId = req.params.bookId
+        let { title, excerpt, releasedAt, ISBN } = req.body
+
+        if (!mongoose.Types.ObjectId.isValid(bookId)) {
+            return res.status(400).send({ status: false, message: "Invalid Book Id" })
+        }
+        const findBook = await booksModel.findOne({ _id: bookId })
+        if (findBook) {
+            const updateBooks = await booksModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { title: title, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN }, { new: true })
+            return res.status(200).send({ status: true, message: "Book updated", data: updateBooks })
+        }
+        else {
+            return res.status(404).send({ status: false, message: "BookId does not exist" })
+        }
+    }
+    catch (err) {
+        res.status(500).send({ status: false, error: err.message })
+    }
+}
+
+
+
+
+module.exports = { createBooks, getBooks, getBookById, updateBooks }

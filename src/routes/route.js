@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const {createUser,userLogin} = require("../controllers/userController")
-const {createBooks,getBooks} = require("../controllers/booksController")
-const {authentication} = require("../middleware/auth")
+const {createBooks,getBooks,getBookById,updateBooks} = require("../controllers/booksController")
+const {authentication,authorisation} = require("../middleware/auth")
 
 //========================= user apis ========================================================
 router.post("/register",createUser)
@@ -13,6 +13,9 @@ router.post("/login",userLogin)
 
 router.post("/books", authentication, createBooks)
 router.get("/books", authentication, getBooks)
+router.get("/books/:bookId",authentication,getBookById)
+router.put("/books/:bookId",authentication,authorisation,updateBooks)
+
 
 
 //================================= review apis =================================================
