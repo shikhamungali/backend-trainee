@@ -240,7 +240,32 @@ const updateBooks = async function (req, res) {
 
 
 
+//==================================== delete books =================================================
+const deleteBooks = async function (req, res) {
+    try {
+        const booksId = req.params.bookId
+        //======================= if invalid book id ==========================================
+        if (!mongoose.Types.ObjectId.isValid(bookId)) {
+            return res.status(400).send({ status: false, message: "Invalid Book Id" })
+        }
+
+        let book = await booksModel.findOne({ _id: booksId, isDeleted: false })
+        if (book) {
+            const deleteBook = await booksModel.findOneAndUpdate({ _id: booksId }, { isDeleted: true, deletedAt: new Date() })
+            return res.status(200).send({ status: true, message: "Book deleted successfully" })
+        }
+        else {
+            return res.status(404).send({ status: false, message: "No such book exist" })
+        }
+
+    }
+    catch (err) {
+        res.status(500).send({ status: false, error: err.message })
+    }
+}
 
 
 
-module.exports = { createBooks, getBooks, getBookById, updateBooks }
+
+
+module.exports = { createBooks, getBooks, getBookById, updateBooks, deleteBooks }
