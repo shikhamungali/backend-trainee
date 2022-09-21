@@ -29,6 +29,7 @@ const createBooks = async function (req, res) {
         if (checkTitle) {
             return res.status(400).send({ status: false, message: "Title already used" })
         }
+        req.body.title = title.replace(/\s+/g, ' ')
         //============================ excerpt is mandatory =========================================
         if (!excerpt) {
             return res.status(400).send({ status: false, message: "excerpt is required" })
@@ -160,8 +161,10 @@ const getBookById = async function (req, res) {
             return res.status(400).send({ status: false, message: "Invalid Book Id" })
         }
         const book = await booksModel.findOne({ _id: bookid, isDeleted: false })
-
-        if (!book) return res.status(404).send({ status: false, message: "Sorry! No book found Or Book may be deleted" })
+        //=================== if books are not found ============================================
+        if (!book) {
+            return res.status(404).send({ status: false, message: "Sorry! No book found Or Book may be deleted" })
+        }
 
         let review = await reviewModel.find({ bookId: bookid, isDeleted: false })
         const bookData = book.toObject() // to convert into mongoose object
@@ -194,7 +197,7 @@ const updateBooks = async function (req, res) {
             return res.status(400).send({ status: false, message: "Invalid Book Id" })
         }
         //=========================== if bodydata is empty =======================================
-        if(Object.keys(req.body).length === 0){
+        if (Object.keys(req.body).length === 0) {
             return res.status(400).send({ status: false, message: "Body cannot be empty" })
         }
         //============================== if title already exist =====================================
@@ -202,22 +205,29 @@ const updateBooks = async function (req, res) {
         if (checkTitle) {
             return res.status(400).send({ status: false, message: "Title already used" })
         }
-        //======================== invalid format of ISBN =======================================
-        if (!isValidISBN13(ISBN)) {
-            return res.status(400).send({ status: false, message: "Please provide correct format for ISBN" })
-        };
         //================================ if ISBN already exist =====================================
         let checkISBN = await booksModel.findOne({ ISBN: ISBN })
         if (checkISBN) {
             return res.status(400).send({ status: false, message: "ISBN already used" })
         }
-        //============================== valid format of releasedAt ====================================
-        if (!isValidDate(releasedAt)) {
-            return res.status(400).send({ status: false, message: "releasedAt is in incorrect format (YYYY-MM-DD)" })
+        //======================== invalid format of ISBN =======================================
+        if (ISBN) {
+            if (!isValidISBN13(ISBN)) {
+                return res.status(400).send({ status: false, message: "Please provide correct format for ISBN" })
+            };
         }
+        //============================== valid format of releasedAt ====================================
+        if(releasedAt){
+            if (!isValidDate(releasedAt)) {
+                return res.status(400).send({ status: false, message: "releasedAt is in incorrect format (YYYY-MM-DD)" })
+            }
+
+        }
+
         //========================== check of blogid exist =======================================
         const findBook = await booksModel.findOne({ _id: bookId })
         if (findBook) {
+            req.body.title = title.replace(/\s+/g, ' ')
             const updateBooks = await booksModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { title: title, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN }, { new: true })
             return res.status(200).send({ status: true, message: "Book updated", data: updateBooks })
         }

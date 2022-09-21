@@ -24,13 +24,14 @@ const createUser = async function (req, res) {
                 status: false,
                 message: "Name is required in a string format length should be 2 to 10",
             });
-
+        req.body.name = name.replace(/\s+/g, ' ')
         //============================ title is mandatory and is of valid format =============================
         if (!title || (title != "Mr" && title != "Mrs" && title != "Miss"))
             return res.status(400).send({
                 status: false,
                 msg: `Title is required in given format, format: "Mr","Mrs" or "Miss`,
             });
+            
         // ========================== email is mandatory and is of valid format ===============================
         if (!email || !isValidEmail(email.trim())) {
             return res
