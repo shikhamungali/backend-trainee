@@ -167,7 +167,7 @@ const getBookById = async function (req, res) {
         }
 
         let review = await reviewModel.find({ bookId: bookid, isDeleted: false })
-        const bookData = book.toObject() // to convert into mongoose object
+        const bookData = book._doc //=book.toJSON()//=book.toObject()
         bookData["reviewsData"] = review
 
         return res.status(200).send({ status: true, message: "Book List", data: bookData })
@@ -221,9 +221,7 @@ const updateBooks = async function (req, res) {
             if (!isValidDate(releasedAt)) {
                 return res.status(400).send({ status: false, message: "releasedAt is in incorrect format (YYYY-MM-DD)" })
             }
-
         }
-
         //========================== check of blogid exist =======================================
         const findBook = await booksModel.findOne({ _id: bookId })
         if (findBook) {

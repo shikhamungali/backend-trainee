@@ -31,7 +31,7 @@ const createUser = async function (req, res) {
                 status: false,
                 msg: `Title is required in given format, format: "Mr","Mrs" or "Miss`,
             });
-            
+
         // ========================== email is mandatory and is of valid format ===============================
         if (!email || !isValidEmail(email.trim())) {
             return res
@@ -117,7 +117,7 @@ const userLogin = async function (req, res) {
         let decode = jwt.decode(token, "humetanahibananahaii")
         console.log(decode)
 
-        res.status(201).send({ status: true, message: "User logged in Successfully", data: token })
+        res.status(201).send({ status: true, message: "User logged in Successfully", data: {token:token,iat:decode.iat,exp:decode.exp} })
     }
 
     catch (err) {
