@@ -205,19 +205,19 @@ const updateBooks = async function (req, res) {
         if (checkTitle) {
             return res.status(400).send({ status: false, message: "Title already used" })
         }
-        //================================ if ISBN already exist =====================================
-        let checkISBN = await booksModel.findOne({ ISBN: ISBN })
-        if (checkISBN) {
-            return res.status(400).send({ status: false, message: "ISBN already used" })
-        }
         //======================== invalid format of ISBN =======================================
         if (ISBN) {
             if (!isValidISBN13(ISBN)) {
                 return res.status(400).send({ status: false, message: "Please provide correct format for ISBN" })
             };
         }
+        //================================ if ISBN already exist =====================================
+        let checkISBN = await booksModel.findOne({ ISBN: ISBN })
+        if (checkISBN) {
+            return res.status(400).send({ status: false, message: "ISBN already used" })
+        }
         //============================== valid format of releasedAt ====================================
-        if(releasedAt){
+        if (releasedAt) {
             if (!isValidDate(releasedAt)) {
                 return res.status(400).send({ status: false, message: "releasedAt is in incorrect format (YYYY-MM-DD)" })
             }
