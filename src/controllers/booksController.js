@@ -80,9 +80,7 @@ const createBooks = async function (req, res) {
         if (!subcategory) {
             return res.status(400).send({ status: false, message: "subcategory is required" })
         };
-        if (typeof subcategory != "object" && typeof subcategory != "array") {
-            return res.status(400).send({ status: false, message: "subcategory is in wrong format" })
-        };
+    
         //============================ releasedAt is mandatory ====================================
         if (!releasedAt) {
             return res.status(400).send({ status: false, message: "releasedAt is required" })
@@ -258,7 +256,7 @@ const deleteBooks = async function (req, res) {
             return res.status(200).send({ status: true, message: "Book deleted successfully" })
         }
         else {
-            return res.status(404).send({ status: false, message: "No such book exist" })
+            return res.status(404).send({ status: false, message: "Book already deleted" })
         }
 
     }
