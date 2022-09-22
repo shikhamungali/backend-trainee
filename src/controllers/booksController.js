@@ -1,7 +1,7 @@
 const reviewModel = require("../models/reviewModel")
 const booksModel = require("../models/booksModel")
 const userModel = require('../models/userModel')
-const { isValidDate, isValidISBN13 } = require("../validation/validator");
+const { isValidDate, isValidISBN13, isValid } = require("../validation/validator");
 const mongoose = require('mongoose')
 
 
@@ -17,37 +17,60 @@ const createBooks = async function (req, res) {
     try {
         let requestBody = req.body;
         const { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = requestBody
+
         //========================= if body data is not present =======================================
+
         if (Object.keys(requestBody).length == 0)
             return res.status(400).send({ status: false, message: "Body can't be empty! Please Provide Data" })
-        //========================== title is mandatory ====================================
+
+        //========================== Validation for Title======================================================
         if (!title) {
             return res.status(400).send({ status: false, message: "Title is required" })
         };
+
+        if(title){
+            if(!isValid(title)) return res.status(400).send({ status: false, message: "Title is in Invalid Format" })
+        }
+
+        req.body.title = title.replace(/\s+/g, ' ')
+        let titles = req.body.title // Assigned proper value in titles
+
         //============================== if title already exist =====================================
-        let checkTitle = await booksModel.findOne({ title: title })
+
+        let checkTitle = await booksModel.findOne({ title: titles })
         if (checkTitle) {
             return res.status(400).send({ status: false, message: "Title already used" })
         }
-        req.body.title = title.replace(/\s+/g, ' ')
-        //============================ excerpt is mandatory =========================================
+        
+        //============================ Validation for Excerpts =========================================
         if (!excerpt) {
             return res.status(400).send({ status: false, message: "excerpt is required" })
         };
+
+        if(excerpt){
+            if(!isValid(excerpt)) return res.status(400).send({ status: false, message: "Excerpt is in Invalid Format" })
+        }
+
+        req.body.title = title.replace(/\s+/g, ' ')
+
         //================================= userId is mandatory =====================================
         if (!userId) {
             return res.status(400).send({ status: false, message: "userId is required" })
         };
 
         //=============================== invalid format of userId =================================
+
         if (!mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(400).send({ status: false, msg: "invalid userId format" });
         }
+
         //=============================== if userId is not found ======================================
+
         let checkuserId = await userModel.findOne({ userId: userId })
         if (!checkuserId) {
             return res.status(400).send({ status: false, message: "userId not found" })
         }
+
         //========================= if the user is authorised to create data =======================
         if (userId != req.token) {
             return res.status(403).send({
@@ -76,6 +99,7 @@ const createBooks = async function (req, res) {
         if (!category.match(stringRegex)) {
             return res.status(400).send({ status: false, message: "category cannot contain numbers" })
         };
+
         //=============================== subcategory is mandatory =============================
         if (!subcategory) {
             return res.status(400).send({ status: false, message: "subcategory is required" })
@@ -93,7 +117,7 @@ const createBooks = async function (req, res) {
 
         //============================== createing books ============================================
         const newBook = await booksModel.create(requestBody);
-        return res.status(201).send({ status: true, message: "Book created successfully", data: newBook })
+        return res.status(201).send({ status: true, message: "Book created successfully 👍🏻", data: newBook })
     }
     catch (error) {
         return res.status(500).send({ status: false, message: error.message })
@@ -115,10 +139,15 @@ const getBooks = async function (req, res) {
         let { userId, category, subcategory } = queryParams
 
         //========================== if query are not entered ==========================================
+
         if (Object.keys(queryParams).length == 0) {
-            const notdeletedBooks = await booksModel.find({isDeleted:false})
+            const notdeletedBooks = await booksModel.find({isDeleted:false}).sort({title : 1}).select('_id title excerpt userId category releasedAt reviews')
+            notdeletedBooks.sort((a, b) => a.title.localeCompare(b.title))
             return res.status(200).send({ status: true, message: "non deleted books",data:notdeletedBooks })
         }
+
+        //=================== if Invalid Query is Given ==================================================
+
         if (!(userId || category || subcategory)) {
             return res.status(400).send({ status: false, message: "enter valid query to get data" })
         }
@@ -200,13 +229,20 @@ const updateBooks = async function (req, res) {
             return res.status(400).send({ status: false, message: "Body cannot be empty" })
         }
         //============================== if title already exist =====================================
-        let checkTitle = await booksModel.findOne({ title: title })
+
+        if(title){
+            if(!isValid(title)) return res.status(400).send({ status: false, message: "Title is in Invalid Format" })
+        }
+
+        req.body.title = title.replace(/\s+/g, ' ')
+        let titles = req.body.title // Assigned proper value in titles
+
+        let checkTitle = await booksModel.findOne({ title: titles })
         if (checkTitle) {
             return res.status(400).send({ status: false, message: "Title already used" })
         }
-        if (title){
-            req.body.title = title.replace(/\s+/g, ' ')
-        }
+
+
         //======================== invalid format of ISBN =======================================
         if (ISBN) {
             if (!isValidISBN13(ISBN)) {
@@ -227,7 +263,7 @@ const updateBooks = async function (req, res) {
         //========================== check of blogid exist =======================================
         const findBook = await booksModel.findOne({ _id: bookId, isDeleted: false })
         if (findBook) {
-            const updateBooks = await booksModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { title: title, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN }, { new: true })
+            const updateBooks = await booksModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { title: titles, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN }, { new: true })
             return res.status(200).send({ status: true, message: "Book updated", data: updateBooks })
         }
         else {
@@ -246,9 +282,9 @@ const deleteBooks = async function (req, res) {
     try {
         const booksId = req.params.bookId
         //======================= if invalid book id ==========================================
-        if (!mongoose.Types.ObjectId.isValid(booksId)) {
-            return res.status(400).send({ status: false, message: "Invalid Book Id" })
-        }
+        // if (!mongoose.Types.ObjectId.isValid(booksId)) {
+        //     return res.status(400).send({ status: false, message: "Invalid Book Id" })
+        // }
 
         let book = await booksModel.findOne({ _id: booksId, isDeleted: false })
         if (book) {
@@ -256,7 +292,7 @@ const deleteBooks = async function (req, res) {
             return res.status(200).send({ status: true, message: "Book deleted successfully" })
         }
         else {
-            return res.status(404).send({ status: false, message: "Book already deleted" })
+            return res.status(404).send({ status: false, message: "Book already Deleted" })
         }
 
     }
