@@ -80,7 +80,7 @@ const createBooks = async function (req, res) {
         if (!subcategory) {
             return res.status(400).send({ status: false, message: "subcategory is required" })
         };
-        if (typeof subcategory != "object" && typeof subcategory != "string") {
+        if (typeof subcategory != "object" && typeof subcategory != "array") {
             return res.status(400).send({ status: false, message: "subcategory is in wrong format" })
         };
         //============================ releasedAt is mandatory ====================================
@@ -118,7 +118,8 @@ const getBooks = async function (req, res) {
 
         //========================== if query are not entered ==========================================
         if (Object.keys(queryParams).length == 0) {
-            return res.status(400).send({ status: false, message: "enter query to get data" })
+            const notdeletedBooks = await booksModel.find({isDeleted:false})
+            return res.status(200).send({ status: true, message: "non deleted books",data:notdeletedBooks })
         }
         if (!(userId || category || subcategory)) {
             return res.status(400).send({ status: false, message: "enter valid query to get data" })
@@ -223,7 +224,7 @@ const updateBooks = async function (req, res) {
             }
         }
         //========================== check of blogid exist =======================================
-        const findBook = await booksModel.findOne({ _id: bookId })
+        const findBook = await booksModel.findOne({ _id: bookId, isDeleted: false })
         if (findBook) {
             req.body.title = title.replace(/\s+/g, ' ')
             const updateBooks = await booksModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { title: title, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN }, { new: true })
