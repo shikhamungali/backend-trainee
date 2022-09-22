@@ -63,9 +63,9 @@ const updateReview = async function (req, res) {
         let data = req.body
         const { review, rating, reviewedBy} = data
 
-        if(!mongoose.Types.ObjectId.isValid(bookid)) return res.status(400).send({status : false, message : "Invalid Format of BookId"})
+        if(!mongoose.isValidObjectId(bookid)) return res.status(400).send({status : false, message : "Invalid Format of BookId"})
 
-        if(!mongoose.Types.ObjectId.isValid(reviewid)) return res.status(400).send({status : false, message : "Invalid Format of ReviewId"})
+        if(!mongoose.isValidObjectId(reviewid)) return res.status(400).send({status : false, message : "Invalid Format of ReviewId"})
 
         let book = await booksModel.findOne({_id : bookid})
         if(!book) return res.status(404).send({status : false, message : "Sorry! Book Not Found!"})
@@ -80,7 +80,7 @@ const updateReview = async function (req, res) {
         }
 
         if(!(review || rating || reviewedBy)){
-            return res.status(400).send({status : false, message : "You cannot update book using invalid key"})
+            return res.status(400).send({status : false, message : "Please enter Valid body to update review"})
         }
 
         let updateReview = await reviewModel.findOneAndUpdate({_id : reviewid},{review : review, rating : rating, reviewedBy : reviewedBy},{new : true})
@@ -98,16 +98,33 @@ const updateReview = async function (req, res) {
 
 
 
-
-
-
-
 //=========================================== delete review ===========================================
 
 const deleteReview = async function (req, res) {
-    try {
+    try {  
+            
+        let bookId = req.params.bookId
+        let reviewId = req.params.reviewId
 
+        if(!mongoose.isValidObjectId(bookId)) return res.status(400).send({status : false, message : "Invalid Format of BookId"})
+
+        if(!mongoose.isValidObjectId(reviewId)) return res.status(400).send({status : false, message : "Invalid Format of ReviewId"})
+
+        let book = await booksModel.findOne({_id : bookId})
+        if(!book) return res.status(404).send({status : false, message : "Sorry! Book Not Found!"})
+        if(book.isDeleted == true) return res.status(400).send({status : false, message : "Book is Deleted. You cannot delete review"})
+        
+        let findreview = await reviewModel.findOne({_id : reviewId})
+        if(!findreview) return res.status(404).send({status : false, message : "Sorry! No such review found!"})
+        if(findreview.isDeleted == true) return res.status(400).send({status : false, message : "Review is Deleted. You cannot update review"})
+
+           const deletereview = await reviewModel.findOneAndUpdate({_id:reviewId},{isDeleted:true,})
+           
+           book.reviews -= 1
+           await book.save();
+           res.status(200).send({status : true, message : "BookReview is Deleted"})
     }
+
     catch (err) {
         res.status(500).send({ status: false, error: err.message })
     }
