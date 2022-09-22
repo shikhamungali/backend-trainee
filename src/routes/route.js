@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { createUser, userLogin } = require("../controllers/userController")
 const { createBooks, getBooks, getBookById, updateBooks, deleteBooks } = require("../controllers/booksController")
-const { createReview } = require('../controllers/reviewController')
+const { createReview,updateReview,deleteReview } = require('../controllers/reviewController')
 const { authentication, authorisation } = require("../middleware/auth");
-const { createReview } = require('../controllers/reviewController');
+
 
 //========================= user apis ========================================================
 router.post("/register", createUser)
@@ -23,6 +23,8 @@ router.delete("/books/:bookId", authentication, authorisation, deleteBooks)
 
 //================================= review apis =================================================
 router.post("/books/:bookId/review", createReview)
+router.put("/books/:bookId/review/:reviewId", updateReview)
+router.delete("/books/:bookId/review/:reviewId", deleteReview)
 
 
 

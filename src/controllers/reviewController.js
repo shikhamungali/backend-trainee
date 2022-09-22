@@ -67,7 +67,7 @@ const updateReview = async function (req, res) {
         let reviewid = req.params.reviewId
         let data = req.body
         const { review, rating, reviewedBy } = data
-
+        
         if (Object.keys(data).length == 0) {
             return res.status(400).send({ status: false, message: "Please provide data to update book review" })
         }
