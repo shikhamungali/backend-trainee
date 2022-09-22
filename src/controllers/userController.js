@@ -25,6 +25,7 @@ const createUser = async function (req, res) {
                 message: "Name is required in a string format length should be 2 to 10",
             });
         req.body.name = name.replace(/\s+/g, ' ')
+
         //============================ title is mandatory and is of valid format =============================
         if (!title || (title != "Mr" && title != "Mrs" && title != "Miss"))
             return res.status(400).send({
@@ -113,7 +114,7 @@ const userLogin = async function (req, res) {
             return res.status(401).send({ status: false, message: "Invalid email or Password" })
 
         // ========================= token creation ===============================================
-        let token = jwt.sign({ userId: findUser._id }, "humetanahibananahaii", { expiresIn: '1h' })
+        let token = jwt.sign({ userId: findUser._id }, "humetanahibananahaii", { expiresIn: '24h' })
         let decode = jwt.decode(token, "humetanahibananahaii")
         console.log(decode)
 
