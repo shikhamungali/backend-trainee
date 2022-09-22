@@ -206,6 +206,9 @@ const updateBooks = async function (req, res) {
         if (checkTitle) {
             return res.status(400).send({ status: false, message: "Title already used" })
         }
+        if (title){
+            req.body.title = title.replace(/\s+/g, ' ')
+        }
         //======================== invalid format of ISBN =======================================
         if (ISBN) {
             if (!isValidISBN13(ISBN)) {
@@ -226,7 +229,6 @@ const updateBooks = async function (req, res) {
         //========================== check of blogid exist =======================================
         const findBook = await booksModel.findOne({ _id: bookId, isDeleted: false })
         if (findBook) {
-            req.body.title = title.replace(/\s+/g, ' ')
             const updateBooks = await booksModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { title: title, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN }, { new: true })
             return res.status(200).send({ status: true, message: "Book updated", data: updateBooks })
         }
@@ -246,7 +248,7 @@ const deleteBooks = async function (req, res) {
     try {
         const booksId = req.params.bookId
         //======================= if invalid book id ==========================================
-        if (!mongoose.Types.ObjectId.isValid(bookId)) {
+        if (!mongoose.Types.ObjectId.isValid(booksId)) {
             return res.status(400).send({ status: false, message: "Invalid Book Id" })
         }
 
