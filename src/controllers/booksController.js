@@ -80,7 +80,7 @@ const createBooks = async function (req, res) {
         if (!subcategory) {
             return res.status(400).send({ status: false, message: "subcategory is required" })
         };
-        if (typeof subcategory != "object" && typeof subcategory != "string") {
+        if (typeof subcategory != "object" && typeof subcategory != "array") {
             return res.status(400).send({ status: false, message: "subcategory is in wrong format" })
         };
         //============================ releasedAt is mandatory ====================================
@@ -118,7 +118,8 @@ const getBooks = async function (req, res) {
 
         //========================== if query are not entered ==========================================
         if (Object.keys(queryParams).length == 0) {
-            return res.status(400).send({ status: false, message: "enter query to get data" })
+            const notdeletedBooks = await booksModel.find({isDeleted:false})
+            return res.status(200).send({ status: true, message: "non deleted books",data:notdeletedBooks })
         }
         if (!(userId || category || subcategory)) {
             return res.status(400).send({ status: false, message: "enter valid query to get data" })
@@ -167,7 +168,7 @@ const getBookById = async function (req, res) {
         }
 
         let review = await reviewModel.find({ bookId: bookid, isDeleted: false })
-        const bookData = book.toObject() // to convert into mongoose object
+        const bookData = book._doc //=book.toJSON()//=book.toObject()
         bookData["reviewsData"] = review
 
         return res.status(200).send({ status: true, message: "Book List", data: bookData })
@@ -205,6 +206,9 @@ const updateBooks = async function (req, res) {
         if (checkTitle) {
             return res.status(400).send({ status: false, message: "Title already used" })
         }
+        if (title){
+            req.body.title = title.replace(/\s+/g, ' ')
+        }
         //======================== invalid format of ISBN =======================================
         if (ISBN) {
             if (!isValidISBN13(ISBN)) {
@@ -221,13 +225,10 @@ const updateBooks = async function (req, res) {
             if (!isValidDate(releasedAt)) {
                 return res.status(400).send({ status: false, message: "releasedAt is in incorrect format (YYYY-MM-DD)" })
             }
-
         }
-
         //========================== check of blogid exist =======================================
-        const findBook = await booksModel.findOne({ _id: bookId })
+        const findBook = await booksModel.findOne({ _id: bookId, isDeleted: false })
         if (findBook) {
-            req.body.title = title.replace(/\s+/g, ' ')
             const updateBooks = await booksModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { title: title, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN }, { new: true })
             return res.status(200).send({ status: true, message: "Book updated", data: updateBooks })
         }
@@ -242,7 +243,32 @@ const updateBooks = async function (req, res) {
 
 
 
+//==================================== delete books =================================================
+const deleteBooks = async function (req, res) {
+    try {
+        const booksId = req.params.bookId
+        //======================= if invalid book id ==========================================
+        if (!mongoose.Types.ObjectId.isValid(booksId)) {
+            return res.status(400).send({ status: false, message: "Invalid Book Id" })
+        }
+
+        let book = await booksModel.findOne({ _id: booksId, isDeleted: false })
+        if (book) {
+            const deleteBook = await booksModel.findOneAndUpdate({ _id: booksId }, { isDeleted: true, deletedAt: new Date() })
+            return res.status(200).send({ status: true, message: "Book deleted successfully" })
+        }
+        else {
+            return res.status(404).send({ status: false, message: "No such book exist" })
+        }
+
+    }
+    catch (err) {
+        res.status(500).send({ status: false, error: err.message })
+    }
+}
 
 
 
-module.exports = { createBooks, getBooks, getBookById, updateBooks }
+
+
+module.exports = { createBooks, getBooks, getBookById, updateBooks, deleteBooks }
