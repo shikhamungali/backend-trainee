@@ -188,17 +188,18 @@ const getBookById = async function (req, res) {
         if (!mongoose.Types.ObjectId.isValid(bookid)) {
             return res.status(400).send({ status: false, message: "Invalid Book Id" })
         }
-        const book = await booksModel.findOne({ _id: bookid, isDeleted: false })
+        const book = await booksModel.findOne({ _id: bookid, isDeleted: false }).lean()
         //=================== if books are not found ============================================
         if (!book) {
             return res.status(404).send({ status: false, message: "Sorry! No book found Or Book may be deleted" })
         }
 
         let review = await reviewModel.find({ bookId: bookid, isDeleted: false })
-        const bookData = book._doc //=book.toJSON()//=book.toObject()
-        bookData["reviewsData"] = review
+        // const bookData = book._doc //=book.toJSON()//=book.toObject()
+        // bookData["reviewsData"]=review
+        book["reviewsData"] = review
 
-        return res.status(200).send({ status: true, message: "Book List", data: bookData })
+        return res.status(200).send({ status: true, message: "Book List", data: book })
     }
 
     catch (err) {

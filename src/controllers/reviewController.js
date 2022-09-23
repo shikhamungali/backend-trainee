@@ -25,18 +25,22 @@ const createReview = async function (req, res) {
     if (isNaN(rating)) {
         return res.status(400).send({ status: false, message: "Rating should be a number" })
     }
+       if (rating !== (1 || 2 || 3 || 4 || 5)){
+           return res.status(400).send({ status: false, message: "Rating can only be 1,2,3,4,5" })
+       }
 
     if (!reviewedBy) {
-        return res.status(400).send({ status: false, message: "ReviewedBy can't be empty" })
+        req.body.reviewedBy="Guest"
+        // return res.status(400).send({ status: false, message: "ReviewedBy can't be empty" })
     }
 
     // bookId -> book exists
-    const book = await booksModel.findOne({ _id: bookId });
+    const book = await booksModel.findOne({ _id: bookId ,isDeleted:false}).lean()
     // !exists - ERRROR
     if (!book) {
         return res.status(404).send({ status: false, message: "Book not found" })
     }
-
+    
     // add review
     const newReview = await reviewModel.create({
         bookId,
@@ -44,11 +48,13 @@ const createReview = async function (req, res) {
         reviewedBy,
         review
     })
+    book["reviewsData"]=newReview
+
     // increment review count of book by 1
     book.reviews += 1
     await book.save();
 
-    return res.status(200).send({ status: true, message: "Review Added", data: newReview })
+    return res.status(200).send({ status: true, message: "Review Added", data: book })
 }
    catch (err) {
        res.status(500).send({ status: false, error: err.message })
@@ -81,7 +87,7 @@ const updateReview = async function (req, res) {
         }
 
 
-        let book = await booksModel.findOne({ _id: bookid })
+        let book = await booksModel.findOne({ _id: bookid }).lean()
         if (!book) {
             return res.status(404).send({ status: false, message: "Sorry! Book Not Found!" })
         }
@@ -97,8 +103,11 @@ const updateReview = async function (req, res) {
             return res.status(400).send({ status: false, message: "Review is Deleted. You cannot update review" })
         }
 
-        let updateReview = await reviewModel.findOneAndUpdate({ _id: reviewid }, { review: review, rating: rating, reviewedBy: reviewedBy }, { new: true })
-        res.status(200).send({ status: true, message: "BookReview is updated", data: updateReview })
+        let updateReview = await reviewModel.findOneAndUpdate({ _id: reviewid }, { review: review, rating: rating, reviewedBy: reviewedBy, reviewedAt:new Date() }, { new: true })
+
+        book["reviewsData"] = updateReview
+        
+        res.status(200).send({ status: true, message: "BookReview is updated", data: book })
     }
     catch (err) {
         res.status(500).send({ status: false, error: err.message })
