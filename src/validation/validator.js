@@ -1,5 +1,7 @@
 const moment = require('moment')
 
+
+
 const isValidEmail = function (mail) {
   if (/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(mail)) {
     return true;
