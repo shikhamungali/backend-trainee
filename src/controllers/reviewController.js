@@ -156,7 +156,7 @@ const updateReview = async function (req, res) {
             }
 
             if (Number.isInteger(rating)) {
-                if (rating >= 5 || rating <= 1) {
+                if (rating < 1 || rating > 5) {
                     return res.status(400).send({ status: false, message: "Rating can only be 1,2,3,4,5" })
                 }
             }
