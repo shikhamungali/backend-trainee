@@ -100,10 +100,25 @@ const createBooks = async function (req, res) {
             return res.status(400).send({ status: false, message: "category cannot contain numbers" })
         };
 
+        if(category.match(stringRegex)){
+            let newcategory = category.toLowerCase()
+            requestBody.category = newcategory            
+        }
+
         //=============================== subcategory is mandatory =============================
         if (!subcategory) {
             return res.status(400).send({ status: false, message: "subcategory is required" })
         };
+
+        if (!subcategory.match(stringRegex)) {
+            return res.status(400).send({ status: false, message: "category cannot contain numbers" })
+        };
+
+        if(subcategory.match(stringRegex)){
+            let newsubcategory = subcategory.toLowerCase()
+            requestBody.subcategory = newsubcategory            
+        }
+
     
         //============================ releasedAt is mandatory ====================================
         if (!releasedAt) {
@@ -157,8 +172,25 @@ const getBooks = async function (req, res) {
                 return res.status(400).send({ status: false, msg: "invalid userId format" });
             }
         }
-        //=============================== finding books in DB ========================================
-        const books = await booksModel.find({ $and: [{ ...queryParams }, { isDeleted: false }] }).sort({ title: 1 }).select('_id title excerpt userId category releasedAt reviews')
+
+        //=======================================changing category to lowercase=======================================
+
+        if(category){
+            let newcategory = category.toLowerCase()
+            queryParams.category = newcategory
+        }
+
+        //==============================changing subcategory to lowercase============================================
+
+        if(subcategory){
+            let newsubcategory = subcategory.toLowerCase()
+            queryParams.subcategory = newsubcategory
+        }
+
+
+        //=============================== finding books in DB ========================================================
+
+        const books = await booksModel.find({ $and: [{...queryParams}, { isDeleted: false }] }).sort({ title: 1 }).select('_id title excerpt userId category releasedAt reviews')
         books.sort((a, b) => a.title.localeCompare(b.title))
         //============================ if book is not found ===========================================
         if (books.length === 0) {
@@ -194,7 +226,7 @@ const getBookById = async function (req, res) {
             return res.status(404).send({ status: false, message: "Sorry! No book found Or Book may be deleted" })
         }
 
-        let review = await reviewModel.find({ bookId: bookid, isDeleted: false })
+        let review = await reviewModel.find({ bookId: bookid, isDeleted: false }).select("_id bookId reviewedBy reviewedAt rating review")
         // const bookData = book._doc //=book.toJSON()//=book.toObject()
         // bookData["reviewsData"]=review
         book["reviewsData"] = review
@@ -233,10 +265,13 @@ const updateBooks = async function (req, res) {
 
         if(title){
             if(!isValid(title)) return res.status(400).send({ status: false, message: "Title is in Invalid Format" })
+
+            req.body.title = title.replace(/\s+/g, ' ')// Assigned proper value in titles           
         }
 
-        req.body.title = title.replace(/\s+/g, ' ')
-        let titles = req.body.title // Assigned proper value in titles
+        let titles = req.body.title
+
+        
 
         let checkTitle = await booksModel.findOne({ title: titles })
         if (checkTitle) {
@@ -307,3 +342,6 @@ const deleteBooks = async function (req, res) {
 
 
 module.exports = { createBooks, getBooks, getBookById, updateBooks, deleteBooks }
+
+
+//{ userId : userId, "category" : {$regex : `${category}`, $options : "i"}, "subcategory" : {$regex : `${subcategory}`,$options : "i"}
