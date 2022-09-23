@@ -30,10 +30,9 @@ const createBooks = async function (req, res) {
 
         if(title){
             if(!isValid(title)) return res.status(400).send({ status: false, message: "Title is in Invalid Format" })
-        }
 
-        req.body.title = title.replace(/\s+/g, ' ')
-        let titles = req.body.title // Assigned proper value in titles
+            req.body.title = title.replace(/\s+/g, ' ')
+        }
 
         //============================== if title already exist =====================================
 
@@ -49,9 +48,11 @@ const createBooks = async function (req, res) {
 
         if(excerpt){
             if(!isValid(excerpt)) return res.status(400).send({ status: false, message: "Excerpt is in Invalid Format" })
+
+            req.body.excerpt = excerpt.replace(/\s+/g, ' ')
         }
 
-        req.body.title = title.replace(/\s+/g, ' ')
+        
 
         //================================= userId is mandatory =====================================
         if (!userId) {
