@@ -129,7 +129,7 @@ const updateReview = async function (req, res) {
             return res.status(404).send({ status: false, message: "Sorry! Book Not Found!" })
         }
         if (book.isDeleted == true) {
-            return res.status(400).send({ status: false, message: "Book is Deleted. You cannot add/update review" })
+            return res.status(404).send({ status: false, message: "Book is Deleted. You cannot add/update review" })
         }
         //=========================== if review not found ============================================
         let findreview = await reviewModel.findOne({ _id: reviewid })
@@ -137,7 +137,7 @@ const updateReview = async function (req, res) {
             return res.status(404).send({ status: false, message: "Sorry! No such review found!" })
         }
         if (findreview.isDeleted == true) {
-            return res.status(400).send({ status: false, message: "Review is Deleted. You cannot update review" })
+            return res.status(404).send({ status: false, message: "Review is Deleted. You cannot update review" })
         }
 
         //=========================== invalid format of review ===================================
