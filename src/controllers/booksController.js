@@ -1,7 +1,7 @@
 const reviewModel = require("../models/reviewModel")
 const booksModel = require("../models/booksModel")
 const userModel = require('../models/userModel')
-const { isValidDate, isValidISBN13, isValid } = require("../validation/validator");
+const { isValidDate, isValidISBN13, isValid, isValidBody} = require("../validation/validator");
 const mongoose = require('mongoose')
 
 
@@ -20,8 +20,9 @@ const createBooks = async function (req, res) {
 
         //========================= if body data is not present =======================================
 
-        if (Object.keys(requestBody).length == 0)
+        if(!isValidBody(requestBody)){
             return res.status(400).send({ status: false, message: "Body can't be empty! Please Provide Data" })
+        }
 
         //========================== Validation for Title======================================================
         if (!title) {
@@ -36,7 +37,7 @@ const createBooks = async function (req, res) {
 
         //============================== if title already exist =====================================
 
-        let checkTitle = await booksModel.findOne({ title: titles })
+        let checkTitle = await booksModel.findOne({ title: title })
         if (checkTitle) {
             return res.status(400).send({ status: false, message: "Title already used" })
         }
@@ -255,13 +256,19 @@ const updateBooks = async function (req, res) {
         const bookId = req.params.bookId
         let { title, excerpt, releasedAt, ISBN } = req.body
         //======================= if invalid book id ==========================================
-        if (!mongoose.Types.ObjectId.isValid(bookId)) {
-            return res.status(400).send({ status: false, message: "Invalid Book Id" })
-        }
+        
         //=========================== if bodydata is empty =======================================
+
         if (Object.keys(req.body).length === 0) {
             return res.status(400).send({ status: false, message: "Body cannot be empty" })
         }
+
+        //==============================Providing Invalid key and data from body============================
+
+        if(!(title || excerpt || releasedAt || ISBN)){
+            return res.status(400).send({status : false, message : "Invalid key to update Book."})
+        }
+
         //============================== if title already exist =====================================
 
         if(title){
@@ -269,16 +276,12 @@ const updateBooks = async function (req, res) {
 
             req.body.title = title.replace(/\s+/g, ' ')// Assigned proper value in titles           
         }
-
         let titles = req.body.title
-
-        
 
         let checkTitle = await booksModel.findOne({ title: titles })
         if (checkTitle) {
             return res.status(400).send({ status: false, message: "Title already used" })
         }
-
 
         //======================== invalid format of ISBN =======================================
         if (ISBN) {
@@ -325,7 +328,7 @@ const deleteBooks = async function (req, res) {
 
         let book = await booksModel.findOne({ _id: booksId, isDeleted: false })
         if (book) {
-            const deleteBook = await booksModel.findOneAndUpdate({ _id: booksId }, { isDeleted: true, deletedAt: new Date() })
+            const deleteBook = await booksModel.findOneAndUpdate({ _id: booksId }, { isDeleted: true, deletedAt: new Date()})
             return res.status(200).send({ status: true, message: "Book deleted successfully" })
         }
         else {

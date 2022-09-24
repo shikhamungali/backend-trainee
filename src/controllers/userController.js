@@ -1,6 +1,7 @@
 const userModel = require("../models/userModel")
-const { isValidBody, isValidEmail, isValidName, isValidPassword, isvalidPhone, isvalidPincode } = require("../validation/validator");
+const { isValidBody, isValidEmail, isValidName, isValidPassword, isvalidPhone, isvalidPincode, isValid } = require("../validation/validator");
 const jwt = require('jsonwebtoken')
+const moment = require("moment")
 
 
 
@@ -19,7 +20,7 @@ const createUser = async function (req, res) {
                 .send({ status: false, msg: "Request body cannot be empty" });
 
         //=================== name is mandatory and is of valid format ==================================
-        if (!name || !isValidName(name))
+        if (!name || !isValidName(name) || !isValid(name))
             return res.status(400).send({
                 status: false,
                 message: "Name is required in a string format length should be 2 to 10",
@@ -27,11 +28,23 @@ const createUser = async function (req, res) {
         req.body.name = name.replace(/\s+/g, ' ')
 
         //============================ title is mandatory and is of valid format =============================
-        if (!title || (title != "Mr" && title != "Mrs" && title != "Miss"))
-            return res.status(400).send({
-                status: false,
-                msg: `Title is required in given format, format: "Mr","Mrs" or "Miss`,
+        // if (!title || (title != "Mr" && title != "Mrs" && title != "Miss")  || title.trim())
+        //     return res.status(400).send({
+        //         status: false,
+        //         msg: `Title is required in given format, format: "Mr","Mrs" or "Miss`,
+        //     });
+
+        if(!title){
+            return res.status(400).send({status : false, message : "Title is mandatory"})
+        }    
+
+        if(title){
+            if ((["Mr", "Mrs", "Miss"].indexOf(title) == -1))
+                return res.status(400).send({
+                    status: false,
+                    msg: `Title is required in given format, format: "Mr","Mrs" or "Miss`,
             });
+        }
 
         // ========================== email is mandatory and is of valid format ===============================
         if (!email || !isValidEmail(email.trim())) {
@@ -39,7 +52,7 @@ const createUser = async function (req, res) {
                 .status(400)
                 .send({ status: false, msg: "email is required in a valid format" });
         }
-        //=============================== duplicate email =======================================
+        //=============================== duplicate email =====================================================
         let inputEmail = await userModel.findOne({ email: email });
         if (inputEmail)
             return res
@@ -57,12 +70,13 @@ const createUser = async function (req, res) {
                 status: false,
                 message: "phone no. is required in a string format length should be of 10",
             });
-        //============================= duplicate phone no. ========================================
+        //============================= duplicate phone no. ================================================
         let inputPhone = await userModel.findOne({ phone: phone });
         if (inputPhone)
             return res
                 .status(400)
                 .send({ status: false, msg: `${phone} is already registered ` });
+
         //============================ validating address =======================================
         if (address && typeof address != "object") {
             return res.status(400).send({ status: false, message: "Address is in wrong format" })
@@ -116,9 +130,18 @@ const userLogin = async function (req, res) {
         // ========================= token creation ===============================================
         let token = jwt.sign({ userId: findUser._id }, "humetanahibananahaii", { expiresIn: '24h' })
         let decode = jwt.decode(token, "humetanahibananahaii")
-        console.log(decode)
 
-        res.status(201).send({ status: true, message: "User logged in Successfully", data: {token:token,iat:decode.iat,exp:decode.exp} })
+        const tokeniat = new Date(decode.iat*1000).toLocaleString()
+        const tokenexp = new Date(decode.exp*1000).toLocaleString()
+        // //const tokeniat = moment(decode.iat).format('YYYY-MM-DD HH:mm:ss')
+        //const tokeniat = moment().format('LLL');
+        // //const tokeniat = moment.unix((decode.iat)/1000).format("YYYY-MM-DD HH:mm:ss")
+        //const tomorrow = moment().add(2, 'minutes').format('LLL');
+        // console.log(tomorrow.format('YYYY-MM-DD'))
+        // //const tokenexp = moment.unix((decode.exp)/1000).format("YYYY-MM-DD HH:mm:ss")
+        
+
+        res.status(201).send({ status: true, message: "User logged in Successfully", data: {token:token,iat:tokeniat,exp:tokenexp} })
     }
 
     catch (err) {

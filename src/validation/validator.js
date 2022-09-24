@@ -36,7 +36,7 @@ const isValidBody = function (data) {
 
 
 const isvalidPhone = function (mobile) {
-  if (/^(\+91[\-\s]?)?[0]?(91)?[789]\d{9}$/.test(mobile)) return true
+  if (/^(\+91[\-\s]?)?[0]?[789]\d{9}$/.test(mobile)) return true
   return false
 };
 

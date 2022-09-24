@@ -1,7 +1,7 @@
 const { default: mongoose } = require("mongoose")
 const booksModel = require("../models/booksModel")
 const reviewModel = require("../models/reviewModel")
-const {isValid} = require("../validation/validator")
+const { isValid } = require("../validation/validator")
 
 const createReview = async function (req, res) {
     try {
@@ -25,8 +25,8 @@ const createReview = async function (req, res) {
             return res.status(400).send({ status: false, message: "Review can't be empty" })
         }
 
-        if(review){
-            if(!isValid(review)) return res.status(400).send({ status: false, message: "Review is in Invalid Format" })
+        if (review) {
+            if (!isValid(review)) return res.status(400).send({ status: false, message: "Review is in Invalid Format" })
 
             req.body.review = review.replace(/\s+/g, ' ')
         }
@@ -46,8 +46,8 @@ const createReview = async function (req, res) {
                     return res.status(400).send({ status: false, message: "Rating can only be 1,2,3,4,5" })
                 }
             }
-            else{
-                return res.status(400).send({status : false, message : "Rating can be only Integer and Whole Number"})
+            else {
+                return res.status(400).send({ status: false, message: "Rating can be only Integer and Whole Number" })
             }
         }
 
@@ -56,16 +56,16 @@ const createReview = async function (req, res) {
             // return res.status(400).send({ status: false, message: "ReviewedBy can't be empty" })
         }
 
-        if(reviewedBy){
-            if(!isValid(reviewedBy)) return res.status(400).send({ status: false, message: "Your name is in Invalid Format" })
+        if (reviewedBy) {
+            if (!isValid(reviewedBy)) return res.status(400).send({ status: false, message: "Your name is in Invalid Format" })
 
             req.body.reviewedBy = reviewedBy.replace(/\s+/g, ' ')
         }
 
-        
+
 
         // bookId -> book exists
-        const book = await booksModel.findOne({ _id: bookId})
+        const book = await booksModel.findOne({ _id: bookId })
         // !exists - ERRROR
         if (!book) {
             return res.status(404).send({ status: false, message: "Book not found" })
@@ -75,22 +75,22 @@ const createReview = async function (req, res) {
         const newReview = await reviewModel.create(data)
 
         const obj = {
-            _id : newReview._id,
-            bookId : newReview.bookId,
-            reviewedBy : newReview.reviewedBy,
-            reviewedAt : newReview.reviewedAt,
-            rating : newReview.rating,
-            review : newReview.review
+            _id: newReview._id,
+            bookId: newReview.bookId,
+            reviewedBy: newReview.reviewedBy,
+            reviewedAt: newReview.reviewedAt,
+            rating: newReview.rating,
+            review: newReview.review
         }
 
-        const addReview = await booksModel.findOneAndUpdate({_id : bookId},{$inc : {reviews : 1}},{new : true}).lean()
+        const addReview = await booksModel.findOneAndUpdate({ _id: bookId }, { $inc: { reviews: 1 } }, { new: true }).lean()
 
         // increment review count of book by 1
         //book.reviews += 1
         //await book.save();
         addReview["reviewsData"] = obj
 
-        return res.status(200).send({ status: true, message: "Review Added", data: addReview })
+        return res.status(201).send({ status: true, message: "Review Added", data: addReview })
     }
     catch (err) {
         res.status(500).send({ status: false, error: err.message })
@@ -105,12 +105,12 @@ const createReview = async function (req, res) {
 
 const updateReview = async function (req, res) {
     try {
-        let bookid = req.params.bookId
+        let bookId = req.params.bookId
         let reviewid = req.params.reviewId
         let data = req.body
         const { review, rating, reviewedBy } = data
 
-        if (!mongoose.isValidObjectId(bookid)) return res.status(400).send({ status: false, message: "Invalid Format of BookId" })
+        if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ status: false, message: "Invalid Format of BookId" })
 
         if (!mongoose.isValidObjectId(reviewid)) return res.status(400).send({ status: false, message: "Invalid Format of ReviewId" })
 
@@ -122,8 +122,8 @@ const updateReview = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please enter Valid body to update review" })
         }
 
-        
-        let book = await booksModel.findOne({ _id: bookid }).lean()
+
+        let book = await booksModel.findOne({ _id: bookId }).lean()
         if (!book) {
             return res.status(404).send({ status: false, message: "Sorry! Book Not Found!" })
         }
@@ -138,11 +138,11 @@ const updateReview = async function (req, res) {
         if (findreview.isDeleted == true) {
             return res.status(400).send({ status: false, message: "Review is Deleted. You cannot update review" })
         }
-        
+
         //_____________________________________Validation for Review__________________________________
 
-        if(review){
-            if(!isValid(review)) return res.status(400).send({ status: false, message: "Review is in Invalid Format" })
+        if (review) {
+            if (!isValid(review)) return res.status(400).send({ status: false, message: "Review is in Invalid Format" })
 
             req.body.review = review.replace(/\s+/g, ' ')
         }
@@ -160,28 +160,33 @@ const updateReview = async function (req, res) {
                     return res.status(400).send({ status: false, message: "Rating can only be 1,2,3,4,5" })
                 }
             }
-            else{
-                return res.status(400).send({status : false, message : "Rating can be only Integer and Whole Number"})
+            else {
+                return res.status(400).send({ status: false, message: "Rating can be only Integer and Whole Number" })
             }
         }
 
         //____________________________Validation for reviewedBy_________________________________________________________
 
-        if(reviewedBy){
-            if(!isValid(reviewedBy)) return res.status(400).send({ status: false, message: "Your name is in Invalid Format" })
+        if (reviewedBy) {
+            if (!isValid(reviewedBy)) return res.status(400).send({ status: false, message: "Your name is in Invalid Format" })
 
             req.body.reviewedBy = reviewedBy.replace(/\s+/g, ' ')
         }
         let reviewedBys = req.body.reviewedBy
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        
+        //_____________________________Authorisation for book updation____________________________________
+    
 
-        let updateReview = await reviewModel.findOneAndUpdate({ _id: reviewid }, { review: reviews, rating: rating, reviewedBy: reviewedBys, reviewedAt: new Date() }, { new: true })
+        if (bookId != findreview.bookId) return res.status(403).send({ status: false, message: "You cannot update review of others books" })
 
-        book["reviewsData"] = updateReview
-
-        res.status(200).send({ status: true, message: "BookReview is updated", data: book })
+        if (bookId == findreview.bookId) {
+            let updateReview = await reviewModel.findOneAndUpdate({ _id: reviewid }, { review: reviews, rating: rating, reviewedBy: reviewedBys, reviewedAt: new Date() }, { new: true })
+            book["reviewsData"] = updateReview
+            res.status(200).send({ status: true, message: "BookReview is updated", data: book })                  
+        }
     }
+
     catch (err) {
         res.status(500).send({ status: false, error: err.message })
     }
@@ -213,10 +218,14 @@ const deleteReview = async function (req, res) {
         if (!findreview) return res.status(404).send({ status: false, message: "Sorry! No such review found!" })
         if (findreview.isDeleted == true) return res.status(400).send({ status: false, message: "Review is Deleted. You cannot delete review" })
 
-        const deletereview = await reviewModel.findOneAndUpdate({ _id: reviewId }, { isDeleted: true, })
+        if (bookId != findreview.bookId) return res.status(403).send({ status: false, message: "You cannot delete review of other books" })
 
-        book.reviews -= 1
-        await book.save();
+        if (bookId == findreview.bookId) {
+            const deletereview = await reviewModel.findOneAndUpdate({ _id: reviewId }, { isDeleted: true, })
+            book.reviews -= 1
+            await book.save();
+        }
+
         res.status(200).send({ status: true, message: "BookReview is Deleted" })
     }
 
