@@ -14,69 +14,46 @@ const createUser = async function (req, res) {
         let { name, phone, email, password, title, address } = data;
 
         //======================== if data is not entered in body =====================================
-        if (!isValidBody(data))
-            return res
-                .status(400)
-                .send({ status: false, msg: "Request body cannot be empty" });
-
+        if (!isValidBody(data)) {
+            return res.status(400).send({ status: false, msg: "Request body cannot be empty" });
+        }
         //=================== name is mandatory and is of valid format ==================================
-        if (!name || !isValidName(name) || !isValid(name))
-            return res.status(400).send({
-                status: false,
-                message: "Name is required in a string format length should be 2 to 10",
-            });
+        if (!name || !isValidName(name) || !isValid(name)) {
+            return res.status(400).send({ status: false, message: "Name is required in a string format length should be 2 to 10" })
+        }
         req.body.name = name.replace(/\s+/g, ' ')
 
         //============================ title is mandatory and is of valid format =============================
-        // if (!title || (title != "Mr" && title != "Mrs" && title != "Miss")  || title.trim())
-        //     return res.status(400).send({
-        //         status: false,
-        //         msg: `Title is required in given format, format: "Mr","Mrs" or "Miss`,
-        //     });
-
-        if(!title){
-            return res.status(400).send({status : false, message : "Title is mandatory"})
-        }    
-
-        if(title){
-            if ((["Mr", "Mrs", "Miss"].indexOf(title) == -1))
-                return res.status(400).send({
-                    status: false,
-                    msg: `Title is required in given format, format: "Mr","Mrs" or "Miss`,
-            });
+        if (!title) {
+            return res.status(400).send({ status: false, message: "Title is mandatory" })
         }
-
+        if (title) {
+            if ((["Mr", "Mrs", "Miss"].indexOf(title.trim()) == -1)) {
+                return res.status(400).send({ status: false, msg: `Title is required in given format, format: "Mr","Mrs" or "Miss` });
+            }
+        }
         // ========================== email is mandatory and is of valid format ===============================
         if (!email || !isValidEmail(email.trim())) {
-            return res
-                .status(400)
-                .send({ status: false, msg: "email is required in a valid format" });
+            return res.status(400).send({ status: false, msg: "email is required in a valid format" });
         }
         //=============================== duplicate email =====================================================
         let inputEmail = await userModel.findOne({ email: email });
-        if (inputEmail)
-            return res
-                .status(400)
-                .send({ status: false, msg: `${email} is already registered` });
+        if (inputEmail) {
+            return res.status(400).send({ status: false, msg: `${email} is already registered` });
+        }
         //================================ password is mandatory and should of valid format ==============
-        if (!password || !isValidPassword(password))
-            return res.status(400).send({
-                status: false,
-                msg: "Password is required with these conditions: at least one upperCase, lowerCase letter, one number and one special character",
-            });
+        if (!password || !isValidPassword(password)) {
+            return res.status(400).send({ status: false, msg: "Password is required with these conditions: at least one upperCase, lowerCase letter, one number and one special character" });
+        }
         //======================== phone no. is mandatory and should be indian no. =======================
-        if (!phone || !isvalidPhone(phone))
-            return res.status(400).send({
-                status: false,
-                message: "phone no. is required in a string format length should be of 10",
-            });
+        if (!phone || !isvalidPhone(phone)) {
+            return res.status(400).send({ status: false, message: "phone no. is required in a string format length should be of 10" });
+        }
         //============================= duplicate phone no. ================================================
         let inputPhone = await userModel.findOne({ phone: phone });
-        if (inputPhone)
-            return res
-                .status(400)
-                .send({ status: false, msg: `${phone} is already registered ` });
-
+        if (inputPhone) {
+            return res.status(400).send({ status: false, msg: `${phone} is already registered ` });
+        }
         //============================ validating address =======================================
         if (address && typeof address != "object") {
             return res.status(400).send({ status: false, message: "Address is in wrong format" })
@@ -106,19 +83,20 @@ const userLogin = async function (req, res) {
         let data = req.body
         const { email, password } = data
         //================================= if data is not entered in body ==================================
-        if (Object.keys(data).length == 0)
+        if (Object.keys(data).length == 0) {
             return res.status(400).send({ status: false, message: "Body can't be empty! Please Provide Data" })
+        }
         //=================================== email not entered ==========================================
-        if (!email)
+        if (!email) {
             return res.status(400).send({ status: false, message: "Please provide Email to login" })
-
+        }
         if (!isValidEmail(email.trim())) {
             return res.status(400).send({ status: false, msg: "invalid email format" });
         }
         //================================= password not entered =======================================
-        if (!password)
+        if (!password) {
             return res.status(400).send({ status: false, message: "Please provide Password to login" })
-
+        }
         if (!isValidPassword(password)) {
             return res.status(400).send({ status: false, msg: "invalid password format" });
         }
@@ -131,17 +109,16 @@ const userLogin = async function (req, res) {
         let token = jwt.sign({ userId: findUser._id }, "humetanahibananahaii", { expiresIn: '24h' })
         let decode = jwt.decode(token, "humetanahibananahaii")
 
-        const tokeniat = new Date(decode.iat*1000).toLocaleString()
-        const tokenexp = new Date(decode.exp*1000).toLocaleString()
+        const tokeniat = new Date(decode.iat * 1000).toLocaleString()
+        const tokenexp = new Date(decode.exp * 1000).toLocaleString()
         // //const tokeniat = moment(decode.iat).format('YYYY-MM-DD HH:mm:ss')
         //const tokeniat = moment().format('LLL');
         // //const tokeniat = moment.unix((decode.iat)/1000).format("YYYY-MM-DD HH:mm:ss")
         //const tomorrow = moment().add(2, 'minutes').format('LLL');
         // console.log(tomorrow.format('YYYY-MM-DD'))
         // //const tokenexp = moment.unix((decode.exp)/1000).format("YYYY-MM-DD HH:mm:ss")
-        
 
-        res.status(201).send({ status: true, message: "User logged in Successfully", data: {token:token,iat:tokeniat,exp:tokenexp} })
+        res.status(201).send({ status: true, message: "User logged in Successfully", data: { token: token, iat: tokeniat, exp: tokenexp } })
     }
 
     catch (err) {

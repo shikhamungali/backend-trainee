@@ -2,6 +2,9 @@ const jwt = require('jsonwebtoken')
 const mongoose = require("mongoose")
 const booksModel = require("../models/booksModel")
 
+
+//========================================== authentication =============================================
+
 const authentication = function (req, res, next) {
     try {
         let token = req.headers["x-api-key"]
@@ -16,32 +19,33 @@ const authentication = function (req, res, next) {
             if (err) {
                 return res.status(401).send({ status: false, message: "Incorrect token" })
             }
-
             else {
                 req.token = decodedToken.userId
                 next()
             }
         })
-    } catch (error) {
+    } 
+    catch (error) {
         return res.status(500).send({ status: false, message: error.message })
     }
 }
 
 
 
+
+
+//==========================   authorisation =====================================================
+
 const authorisation = async function (req, res, next) {
     try {
         let bookid = req.params.bookId
+        let validUser = req.token // userid from token
 
         if (!mongoose.isValidObjectId(bookid)) {
             return res.status(400).send({ status: false, message: "Invalid Format of Book Id" })
         }
 
-        let validUser = req.token // userid from token
-
         let book = await booksModel.findById(bookid)
-        
-
         if (book) {
             let user = book.userId.toString() //userId from book
             if (user !== validUser) {
@@ -50,13 +54,10 @@ const authorisation = async function (req, res, next) {
 
             next()
         }
-
         else{
-            return res.status(404).send({ status: false, message: "Book not found or BookId doesnot exist" })
-
+            return res.status(404).send({ status: false, message: "Book not found or BookId does not exist" })
         }
     }
-
     catch (err) {
         res.status(500).send({ status: false, error: err.message })
     }

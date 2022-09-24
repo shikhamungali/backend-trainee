@@ -1,7 +1,7 @@
 const reviewModel = require("../models/reviewModel")
 const booksModel = require("../models/booksModel")
 const userModel = require('../models/userModel')
-const { isValidDate, isValidISBN13, isValid, isValidBody} = require("../validation/validator");
+const { isValidDate, isValidISBN13, isValid, isValidBody } = require("../validation/validator");
 const mongoose = require('mongoose')
 
 
@@ -20,7 +20,7 @@ const createBooks = async function (req, res) {
 
         //========================= if body data is not present =======================================
 
-        if(!isValidBody(requestBody)){
+        if (!isValidBody(requestBody)) {
             return res.status(400).send({ status: false, message: "Body can't be empty! Please Provide Data" })
         }
 
@@ -73,13 +73,11 @@ const createBooks = async function (req, res) {
             return res.status(400).send({ status: false, message: "userId not found" })
         }
 
-        //========================= if the user is authorised to create data =======================
+        //========================= if the user is unauthorised to create data =======================
         if (userId != req.token) {
-            return res.status(403).send({
-                status: false,
-                message: "Unauthorized access ! User's credentials do not match."
-            })
+            return res.status(403).send({ status: false, message: "Unauthorized access ! User's credentials do not match." })
         }
+
         //======================== ISBN is mandatory ===========================================
         if (!ISBN) {
             return res.status(400).send({ status: false, message: "ISBN is required" })
@@ -250,8 +248,7 @@ const updateBooks = async function (req, res) {
     try {
         const bookId = req.params.bookId
         let { title, excerpt, releasedAt, ISBN } = req.body
-        //======================= if invalid book id ==========================================
-        
+
         //=========================== if bodydata is empty =======================================
 
         if (Object.keys(req.body).length === 0) {
@@ -260,8 +257,8 @@ const updateBooks = async function (req, res) {
 
         //==============================Providing Invalid key and data from body============================
 
-        if(!(title || excerpt || releasedAt || ISBN)){
-            return res.status(400).send({status : false, message : "Invalid key to update Book."})
+        if (!(title || excerpt || releasedAt || ISBN)) {
+            return res.status(400).send({ status: false, message: "Invalid key to update Book." })
         }
 
         //============================== if title already exist =====================================
@@ -296,14 +293,14 @@ const updateBooks = async function (req, res) {
                 return res.status(400).send({ status: false, message: "releasedAt is in incorrect format (YYYY-MM-DD)" })
             }
         }
-        //========================== check of blogid exist =======================================
+        //========================== check of book is deleted or not =======================================
         const findBook = await booksModel.findOne({ _id: bookId, isDeleted: false })
         if (findBook) {
             const updateBooks = await booksModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { title: titles, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN }, { new: true })
             return res.status(200).send({ status: true, message: "Book updated", data: updateBooks })
         }
         else {
-            return res.status(404).send({ status: false, message: "BookId does not exist" })
+            return res.status(404).send({ status: false, message: "Book already deleted" })
         }
     }
     catch (err) {
@@ -320,14 +317,10 @@ const updateBooks = async function (req, res) {
 const deleteBooks = async function (req, res) {
     try {
         const booksId = req.params.bookId
-        //======================= if invalid book id ==========================================
-        // if (!mongoose.Types.ObjectId.isValid(booksId)) {
-        //     return res.status(400).send({ status: false, message: "Invalid Book Id" })
-        // }
 
         let book = await booksModel.findOne({ _id: booksId, isDeleted: false })
         if (book) {
-            const deleteBook = await booksModel.findOneAndUpdate({ _id: booksId }, { isDeleted: true, deletedAt: new Date()})
+            const deleteBook = await booksModel.findOneAndUpdate({ _id: booksId }, { isDeleted: true, deletedAt: new Date() })
             return res.status(200).send({ status: true, message: "Book deleted successfully" })
         }
         else {

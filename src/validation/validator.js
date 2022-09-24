@@ -1,6 +1,20 @@
 const moment = require('moment')
 
 
+const isValidBody = function (data) {
+  return Object.keys(data).length > 0;
+};
+
+
+
+
+const isValid = function (value) {
+  if (typeof value !== "string")   return false
+  if (typeof value === 'string' && value.trim().length === 0) return false        
+  return true;
+};
+
+
 
 const isValidEmail = function (mail) {
   if (/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(mail)) {
@@ -23,17 +37,6 @@ const isValidName = function (name) {
   return false
 };
 
-// const isValidTitle = function (title) {
-//   if (/^[A-Za-z\s]$/.test(title)) return true
-//   return false
-// };
-
-
-
-
-const isValidBody = function (data) {
-  return Object.keys(data).length > 0;
-};
 
 
 
@@ -61,11 +64,8 @@ const isValidISBN13 = function (ISBN) {
   return false
 }
 
-const isValid = function (value) {
-  if (typeof value !== "string")   return false
-  if (typeof value === 'string' && value.trim().length === 0) return false        
-  return true;
-};
+
+
 
 
 module.exports = { isValidEmail, isValidName, isValidBody, isValidPassword, isvalidPhone, isvalidPincode,isValidDate ,isValidISBN13,isValid};
