@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken')
 
 
 
+
 //-------------------------------------- user creation --------------------------------------------------
 
 const createUser = async function (req, res) {
@@ -112,12 +113,12 @@ const userLogin = async function (req, res) {
         const tokenexp = new Date(decode.exp * 1000).toLocaleString()
         // //const tokeniat = moment(decode.iat).format('YYYY-MM-DD HH:mm:ss')
         //const tokeniat = moment().format('LLL');
-        // //const tokeniat = moment.unix((decode.iat)/1000).format("YYYY-MM-DD HH:mm:ss")
+        // const tokeniat = moment.unix((decode.iat)*1000).format("YYYY-MM-DD HH:mm:ss")
         //const tomorrow = moment().add(2, 'minutes').format('LLL');
         // console.log(tomorrow.format('YYYY-MM-DD'))
         // //const tokenexp = moment.unix((decode.exp)/1000).format("YYYY-MM-DD HH:mm:ss")
 
-        res.status(201).send({ status: true, message: "User logged in Successfully", data: { token: token, iat: tokeniat, exp: tokenexp } })
+        res.status(201).send({ status: true, message: "User logged in Successfully", data: { token: token,userId:decode.userId, iat: tokeniat, exp: tokenexp } })
     }
 
     catch (err) {

@@ -11,8 +11,8 @@ router.post("/register", createUser)
 router.post("/login", userLogin)
 
 
-//========================= book apis =========================================================
 
+//========================= book apis =========================================================
 router.post("/books", authentication, createBooks)
 router.get("/books", authentication, getBooks)
 router.get("/books/:bookId", authentication, getBookById)
@@ -30,9 +30,9 @@ router.delete("/books/:bookId/review/:reviewId", deleteReview)
 
 //======================== to check if the endpoint is correct or not =========================================
 router.all("/**", function (req, res) {
-    res.status(404).send({
+    res.status(400).send({
         status: false,
-        msg: "The api you request is not available"
+        msg: "The api you are requesting is not available"
     })
 })
 
