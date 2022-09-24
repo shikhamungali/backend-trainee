@@ -29,8 +29,8 @@ const createBooks = async function (req, res) {
             return res.status(400).send({ status: false, message: "Title is required" })
         };
 
-        if(title){
-            if(!isValid(title)) return res.status(400).send({ status: false, message: "Title is in Invalid Format" })
+        if (title) {
+            if (!isValid(title)) return res.status(400).send({ status: false, message: "Title is in Invalid Format" })
 
             req.body.title = title.replace(/\s+/g, ' ')
         }
@@ -41,19 +41,19 @@ const createBooks = async function (req, res) {
         if (checkTitle) {
             return res.status(400).send({ status: false, message: "Title already used" })
         }
-        
+
         //============================ Validation for Excerpts =========================================
         if (!excerpt) {
             return res.status(400).send({ status: false, message: "excerpt is required" })
         };
 
-        if(excerpt){
-            if(!isValid(excerpt)) return res.status(400).send({ status: false, message: "Excerpt is in Invalid Format" })
+        if (excerpt) {
+            if (!isValid(excerpt)) return res.status(400).send({ status: false, message: "Excerpt is in Invalid Format" })
 
             req.body.excerpt = excerpt.replace(/\s+/g, ' ')
         }
 
-        
+
 
         //================================= userId is mandatory =====================================
         if (!userId) {
@@ -102,9 +102,9 @@ const createBooks = async function (req, res) {
             return res.status(400).send({ status: false, message: "category cannot contain numbers" })
         };
 
-        if(category.match(stringRegex)){
+        if (category.match(stringRegex)) {
             let newcategory = category.toLowerCase()
-            requestBody.category = newcategory            
+            requestBody.category = newcategory
         }
 
         //=============================== subcategory is mandatory =============================
@@ -116,12 +116,12 @@ const createBooks = async function (req, res) {
             return res.status(400).send({ status: false, message: "category cannot contain numbers" })
         };
 
-        if(subcategory.match(stringRegex)){
+        if (subcategory.match(stringRegex)) {
             let newsubcategory = subcategory.toLowerCase()
-            requestBody.subcategory = newsubcategory            
+            requestBody.subcategory = newsubcategory
         }
 
-    
+
         //============================ releasedAt is mandatory ====================================
         if (!releasedAt) {
             return res.status(400).send({ status: false, message: "releasedAt is required" })
@@ -158,11 +158,10 @@ const getBooks = async function (req, res) {
         //========================== if query are not entered ==========================================
 
         if (Object.keys(queryParams).length == 0) {
-            const notdeletedBooks = await booksModel.find({isDeleted:false}).sort({title : 1}).select('_id title excerpt userId category releasedAt reviews')
+            const notdeletedBooks = await booksModel.find({ isDeleted: false }).sort({ title: 1 }).select('_id title excerpt userId category releasedAt reviews')
             notdeletedBooks.sort((a, b) => a.title.localeCompare(b.title))
-            return res.status(200).send({ status: true, message: "non deleted books",data:notdeletedBooks })
+            return res.status(200).send({ status: true, message: "non deleted books", data: notdeletedBooks })
         }
-
         //=================== if Invalid Query is Given ==================================================
 
         if (!(userId || category || subcategory)) {
@@ -174,26 +173,22 @@ const getBooks = async function (req, res) {
                 return res.status(400).send({ status: false, msg: "invalid userId format" });
             }
         }
-
-        //=======================================changing category to lowercase=======================================
-
-        if(category){
+        //=======================================changing category to lowercase==========
+        if (category) {
             let newcategory = category.toLowerCase()
             queryParams.category = newcategory
         }
+        //==============================changing subcategory to lowercase==========================
 
-        //==============================changing subcategory to lowercase============================================
-
-        if(subcategory){
+        if (subcategory) {
             let newsubcategory = subcategory.toLowerCase()
             queryParams.subcategory = newsubcategory
         }
+        //=============================== finding books in DB ================================
 
-
-        //=============================== finding books in DB ========================================================
-
-        const books = await booksModel.find({ $and: [{...queryParams}, { isDeleted: false }] }).sort({ title: 1 }).select('_id title excerpt userId category releasedAt reviews')
+        const books = await booksModel.find({ $and: [{ ...queryParams }, { isDeleted: false }] }).sort({ title: 1 }).select('_id title excerpt userId category releasedAt reviews')
         books.sort((a, b) => a.title.localeCompare(b.title))
+
         //============================ if book is not found ===========================================
         if (books.length === 0) {
             return res.status(404).send({ status: false, message: "Books not found" })
@@ -271,9 +266,10 @@ const updateBooks = async function (req, res) {
 
         //============================== if title already exist =====================================
 
-        if(title){
-            if(!isValid(title)) return res.status(400).send({ status: false, message: "Title is in Invalid Format" })
-
+        if (title) {
+            if (!isValid(title)) {
+                return res.status(400).send({ status: false, message: "Title is in Invalid Format" })
+            }
             req.body.title = title.replace(/\s+/g, ' ')// Assigned proper value in titles           
         }
         let titles = req.body.title
@@ -317,6 +313,9 @@ const updateBooks = async function (req, res) {
 
 
 
+
+
+
 //==================================== delete books =================================================
 const deleteBooks = async function (req, res) {
     try {
@@ -346,6 +345,11 @@ const deleteBooks = async function (req, res) {
 
 
 module.exports = { createBooks, getBooks, getBookById, updateBooks, deleteBooks }
+
+
+
+
+
 
 
 //{ userId : userId, "category" : {$regex : `${category}`, $options : "i"}, "subcategory" : {$regex : `${subcategory}`,$options : "i"}
