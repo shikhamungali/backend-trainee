@@ -7,6 +7,8 @@ const mongoose = require('mongoose')
 
 
 
+
+
 const stringRegex = /^[ a-z ]+$/i
 
 
@@ -16,7 +18,7 @@ const stringRegex = /^[ a-z ]+$/i
 const createBooks = async function (req, res) {
     try {
         let requestBody = req.body;
-        const { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = requestBody
+        const { title, excerpt, userId, ISBN, category, subcategory, releasedAt ,bookCover} = requestBody
 
         //========================= if body data is not present =======================================
 
@@ -128,9 +130,19 @@ const createBooks = async function (req, res) {
         if (!isValidDate(releasedAt)) {
             return res.status(400).send({ status: false, message: "releasedAt is in incorrect format (YYYY-MM-DD)" })
         }
+        //================================== bookCover validations ==================================
+        if (!bookCover) {
+            return res.status(400).send({ status: false, message: "BookCover is required" })
+        };
 
+        let checkCover = await booksModel.findOne({ bookCover: bookCover })
+        if (checkCover) {
+            return res.status(400).send({ status: false, message: "Bookcover already used" })
+        }
+       
+        
 
-        //============================== createing books ============================================
+        //============================== creating books ============================================
         const newBook = await booksModel.create(requestBody);
         return res.status(201).send({ status: true, message: "Book created successfully 👍🏻", data: newBook })
     }

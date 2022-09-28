@@ -21,7 +21,7 @@ const createUser = async function (req, res) {
         if (!name || !isValidName(name) || !isValid(name)) {
             return res.status(400).send({ status: false, message: "Name is required in a string format length should be 2 to 10" })
         }
-        req.body.name = name.replace(/\s+/g, ' ')
+        req.body.name = name.replace(/\s+/g, ' ') 
 
         //============================ title is mandatory and is of valid format =============================
         if (!title) {
